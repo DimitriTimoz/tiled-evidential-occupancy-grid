@@ -4,6 +4,14 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
+class Point2D 
+{
+public:
+  float x, y;
+
+  Point2D(float x, float y) : x(x), y(y) {}
+};
+
 class LaserScanToGrid
 {
 public:
@@ -14,11 +22,32 @@ public:
 
   void visionCallback(const sensor_msgs::LaserScanConstPtr& msg)
   {
+    // Clear points
+    points.clear();
+
+    // Compute cartesian position of all the points
+    for (int i = 0; i < msg->ranges.size(); i++)
+    {
+      float angle = msg->angle_min + i * msg->angle_increment;
+      float range = msg->ranges[i];
+
+      if (range < msg->range_min || range > msg->range_max)
+      {
+        continue;
+      }
+
+      float x = range * cos(angle);
+      float y = range * sin(angle);
+
+      points.push_back(Point2D(x, y));
+    }
+
     ROS_INFO_STREAM(msg);
   }
 
 private:
   ros::Subscriber ar_sub_;
+  std::vector<Point2D> points;
 };
 
 int main(int argc, char* argv[])
