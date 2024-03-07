@@ -9,7 +9,7 @@ class LaserScanToGrid
 public:
   LaserScanToGrid(ros::NodeHandle& nh)
   {
-    ar_sub_ = nh.subscribe<sensor_msgs::LaserScan>("laser_scan", 1, &LaserScanToGrid::visionCallback, this);
+    this->ar_sub_ = nh.subscribe<sensor_msgs::LaserScan>("laser_scan", 1, &LaserScanToGrid::visionCallback, this);
   }
 
   void visionCallback(const sensor_msgs::LaserScanConstPtr& msg)
@@ -17,6 +17,7 @@ public:
     ROS_INFO_STREAM(msg);
   }
 
+private:
   ros::Subscriber ar_sub_;
 };
 
@@ -28,7 +29,7 @@ int main(int argc, char* argv[])
   ros::NodeHandle nh;
 
   LaserScanToGrid laser_scan_to_grid(nh);
-  ROS_INFO("Hello, World!");
+  ROS_INFO("Hello, I am a laser_scan_to_grid_node.");
 
   // Don't exit the program.
   ros::spin();
