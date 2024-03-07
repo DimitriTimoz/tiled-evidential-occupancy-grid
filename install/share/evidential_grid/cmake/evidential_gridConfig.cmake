@@ -67,14 +67,14 @@ set(evidential_grid_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(evidential_grid_SOURCE_PREFIX /home/alix_anneraud/Git/INSA/tiled_evidential_occupancy_grid_maps/src/evidential_grid)
-  set(evidential_grid_DEVEL_PREFIX /home/alix_anneraud/Git/INSA/tiled_evidential_occupancy_grid_maps/devel)
+  set(evidential_grid_SOURCE_PREFIX /home/ros/project/tiled_evidential_occupancy_grid_maps/src/evidential_grid)
+  set(evidential_grid_DEVEL_PREFIX /home/ros/project/tiled_evidential_occupancy_grid_maps/devel)
   set(evidential_grid_INSTALL_PREFIX "")
   set(evidential_grid_PREFIX ${evidential_grid_DEVEL_PREFIX})
 else()
   set(evidential_grid_SOURCE_PREFIX "")
   set(evidential_grid_DEVEL_PREFIX "")
-  set(evidential_grid_INSTALL_PREFIX /home/alix_anneraud/Git/INSA/tiled_evidential_occupancy_grid_maps/install)
+  set(evidential_grid_INSTALL_PREFIX /home/ros/project/tiled_evidential_occupancy_grid_maps/install)
   set(evidential_grid_PREFIX ${evidential_grid_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/alix_anneraud/Git/INSA/tiled_evidential_occupancy_grid_maps/install/lib;/home/alix_anneraud/Git/INSA/tiled_evidential_occupancy_grid_maps/devel/lib;/opt/ros/melodic/lib)
+    foreach(path /home/ros/project/tiled_evidential_occupancy_grid_maps/install/lib;/home/ros/project/tiled_evidential_occupancy_grid_maps/devel/lib;/opt/ros/melodic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

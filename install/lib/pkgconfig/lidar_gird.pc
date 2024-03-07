@@ -1,7 +1,7 @@
 prefix=/home/ros/project/tiled_evidential_occupancy_grid_maps/install
 
-Name: evidential_grid
-Description: Description of evidential_grid
+Name: lidar_grid
+Description: Description of lidar_grid
 Version: 0.0.0
 Cflags: 
 Libs: -L${prefix}/lib 
