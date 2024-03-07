@@ -202,8 +202,8 @@ target_link_libraries(${PROJECT_NAME}_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(utest_node test/utest_launch.test src/test/utest.cpp)
-  target_link_libraries(utest_node ${catkin_LIBRARIES})
+
+catkin_add_gtest(${PROJECT_NAME}-test src/test/utest.cpp)
+if(TARGET ${PROJECT_NAME}-test)
+  target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 endif()
