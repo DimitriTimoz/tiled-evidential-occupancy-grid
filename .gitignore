@@ -1,3 +1,4 @@
 build/
-share/
-devel/
+share/*
+devel/*
+install/*
