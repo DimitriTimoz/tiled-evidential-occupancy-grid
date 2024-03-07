@@ -8,7 +8,8 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
+  roscpp 
+  sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,7 +104,9 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lidar_grid
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS 
+    roscpp 
+    sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -119,6 +122,8 @@ include_directories(
 )
 
 add_executable(laser_scan_to_grid_node src/laser_scan_to_grid_node.cpp)
+
+add_dependencies(laser_scan_to_grid_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
