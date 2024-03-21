@@ -127,6 +127,7 @@ add_executable(
   src/Talker.cpp 
   src/Point2D.cpp
   src/EOGM.cpp
+  src/LaserScanToGrid.cpp
 )
 
 add_dependencies(laser_scan_to_grid_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
