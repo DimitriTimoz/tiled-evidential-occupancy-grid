@@ -9,6 +9,7 @@
 #include <sstream>
 #include "Point2D.h"
 #include "Talker.h"
+#include "EOGM.h"
 
 class LaserScanToGrid
 {
