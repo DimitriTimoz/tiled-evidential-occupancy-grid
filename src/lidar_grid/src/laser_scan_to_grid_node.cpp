@@ -9,6 +9,7 @@
 #include <sstream>
 #include "Point2D.h"
 #include "Talker.h"
+#include "EOGM.h"
 
 class LaserScanToGrid
 {
@@ -46,7 +47,7 @@ public:
       }
       occupied[x][y] += 1;
     }
-    EOGM eogm(occupied, free, 100, 100, resolution);
+    EOGM eogm(occupied, free, 5, 5, resolution);
     // TODO: Publish the EOGM
     this->free.clear();
     this->occupied.clear();
