@@ -46,7 +46,10 @@ public:
       }
       occupied[x][y] += 1;
     }
-
+    EOGM eogm(occupied, free, 100, 100, resolution);
+    // TODO: Publish the EOGM
+    this->free.clear();
+    this->occupied.clear();
     ROS_INFO_STREAM(msg);
   }
 
