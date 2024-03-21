@@ -47,7 +47,7 @@ public:
       }
       occupied[x][y] += 1;
     }
-    EOGM eogm(occupied, free, 100, 100, resolution);
+    EOGM eogm(occupied, free, 5, 5, resolution);
     // TODO: Publish the EOGM
     this->free.clear();
     this->occupied.clear();

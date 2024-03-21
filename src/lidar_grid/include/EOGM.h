@@ -15,7 +15,7 @@ class EOGM
 {
 public:
     EOGM(vector<std::vector<int>> occupied, vector<std::vector<int>> free, int width, int height, float resolution);
-    ~EOGM();
+    ~EOGM() = default;
 
     
 
