@@ -1,0 +1,2 @@
+catkin_make install
+rosrun lidar_grid laser_scan_to_grid_node
