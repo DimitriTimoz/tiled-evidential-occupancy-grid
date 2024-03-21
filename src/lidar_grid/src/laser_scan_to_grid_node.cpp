@@ -1,21 +1,19 @@
+#ifndef TALKER_H
+#define TALKER_H
+
 /**
 **  Simple ROS Node
 **/
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
-
-class Point2D 
-{
-public:
-  float x, y;
-
-  Point2D(float x, float y) : x(x), y(y) {}
-};
+#include <sstream>
+#include "Point2D.h"
+#include "Talker.h"
 
 class LaserScanToGrid
 {
 public:
-  LaserScanToGrid(ros::NodeHandle& nh)
+  LaserScanToGrid(ros::NodeHandle& nh) : talker_(&nh)
   {
     this->ar_sub_ = nh.subscribe<sensor_msgs::LaserScan>("laser_scan", 1, &LaserScanToGrid::visionCallback, this);
   }
@@ -47,6 +45,7 @@ public:
 
 private:
   ros::Subscriber ar_sub_;
+  Talker talker_;
   std::vector<Point2D> points;
 };
 
@@ -63,3 +62,4 @@ int main(int argc, char* argv[])
   // Don't exit the program.
   ros::spin();
 }
+#endif
