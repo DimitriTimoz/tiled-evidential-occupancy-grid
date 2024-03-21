@@ -34,10 +34,17 @@ public:
         continue;
       }
 
-      float x = range * cos(angle);
-      float y = range * sin(angle);
-
-      points.push_back(Point2D(x, y));
+      int x = 0;
+      int y = 0;
+      float step = 0;
+      while (step < range)
+      {
+        step += resolution;
+        x = (int)(step * cos(angle))/resolution;
+        y = (int)(step * sin(angle))/resolution;
+        free[x][y] += 1;
+      }
+      occupied[x][y] += 1;
     }
 
     ROS_INFO_STREAM(msg);
@@ -47,6 +54,10 @@ private:
   ros::Subscriber ar_sub_;
   Talker talker_;
   std::vector<Point2D> points;
+  // Grid 
+  std::vector<std::vector<int>> occupied;
+  std::vector<std::vector<int>> free;
+  float resolution = 0.1;
 };
 
 int main(int argc, char* argv[])
