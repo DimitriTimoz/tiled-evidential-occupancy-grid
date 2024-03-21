@@ -39,10 +39,10 @@ public:
       float step = 0;
       while (step < range)
       {
+        free[x][y] += 1;
         step += resolution;
         x = (int)(step * cos(angle))/resolution;
         y = (int)(step * sin(angle))/resolution;
-        free[x][y] += 1;
       }
       occupied[x][y] += 1;
     }
