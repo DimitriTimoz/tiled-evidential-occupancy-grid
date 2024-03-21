@@ -3,7 +3,7 @@
 class Point2D 
 {
 public:
-  float x, y;
+  int x, y;
 
-  Point2D(float x, float y) : x(x), y(y) {}
+  Point2D(int x, int y) : x(x), y(y) {}
 };
