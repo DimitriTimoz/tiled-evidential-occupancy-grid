@@ -1,7 +1,7 @@
 #include "EOGM.h"
 #include <cmath>
 
-EOGM::EOGM(vector<std::vector<int>> occupied, vector<std::vector<int>> free, int width, int height, float resolution)
+EOGM::EOGM(vector<std::vector<unsigned int>> occupied, vector<std::vector<unsigned int>> free, int width, int height, float resolution)
 {
     this->grid = vector<std::vector<CellState>>(width, vector<CellState>(height, CellState::UNKNOWN));
 
@@ -20,7 +20,6 @@ EOGM::EOGM(vector<std::vector<int>> occupied, vector<std::vector<int>> free, int
         }
     }
 }
-
 
 map<Point2D, CellState> EOGM::getGrid(float rotation_matrix[2][2], float translation_vector[2])
 {

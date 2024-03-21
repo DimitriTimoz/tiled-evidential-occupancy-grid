@@ -5,7 +5,7 @@
 
 class Talker {
 public:
-    Talker(ros::NodeHandle* nodehandle);
+    Talker(ros::NodeHandle& nodehandle);
     void publishMessage(std_msgs::String& msg);
 
 private:
