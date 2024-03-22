@@ -1,4 +1,4 @@
-#include "EOGM.h"
+#include "common/EOGM.h"
 #include <cmath>
 
 EOGM::EOGM(vector<std::vector<unsigned int>> occupied, vector<std::vector<unsigned int>> free, int width, int height, float resolution)
