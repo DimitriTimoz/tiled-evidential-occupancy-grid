@@ -1,6 +1,6 @@
 #include "Talker.h"
 
-Talker::Talker(ros::NodeHandle* nodehandle): nh_(*nodehandle) {
+Talker::Talker(ros::NodeHandle& nodehandle): nh_(nodehandle) {
     this->initializePublisher();
 }
 
