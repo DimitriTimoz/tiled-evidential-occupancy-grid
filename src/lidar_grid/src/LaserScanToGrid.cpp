@@ -1,5 +1,5 @@
 #include "LaserScanToGrid.h"
-#include "EOGM.h"
+#include "common/EOGM.h"
 
 LaserScanToGrid::LaserScanToGrid(ros::NodeHandle& nodehandle) : talker_(nodehandle)
 {

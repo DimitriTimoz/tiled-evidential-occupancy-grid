@@ -2,7 +2,7 @@
 
 #include "ros/ros.h"
 #include "Talker.h"
-#include "Point2D.h"
+#include "common/Point2D.h"
 #include <sensor_msgs/LaserScan.h>
 
 class LaserScanToGrid
