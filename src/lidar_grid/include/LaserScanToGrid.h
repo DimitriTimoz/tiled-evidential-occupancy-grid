@@ -18,5 +18,5 @@ private:
   // Grid 
   std::vector<std::vector<unsigned int>> occupied;
   std::vector<std::vector<unsigned int>> free;
-  float resolution = 0.1;
+  float resolution = 0.05;
 };
