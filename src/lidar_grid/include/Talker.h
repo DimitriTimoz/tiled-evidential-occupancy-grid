@@ -2,11 +2,11 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-
+#include <nav_msgs/OccupancyGrid.h>
 class Talker {
 public:
     Talker(ros::NodeHandle& nodehandle);
-    void publishMessage(std_msgs::String& msg);
+    void publishMessage(nav_msgs::OccupancyGrid& msg);
 
 private:
     ros::NodeHandle nh_;

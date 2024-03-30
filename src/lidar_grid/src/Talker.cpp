@@ -5,10 +5,10 @@ Talker::Talker(ros::NodeHandle& nodehandle): nh_(nodehandle) {
 }
 
 void Talker::initializePublisher() {
-    this->chatter_publisher_ = this->nh_.advertise<std_msgs::String>("eogm", 1000);
+    this->chatter_publisher_ = this->nh_.advertise<nav_msgs::OccupancyGrid>("eogm", 1000);
 }
 
-void Talker::publishMessage(std_msgs::String& msg) {
-    ROS_INFO("%s", msg.data.c_str());
+void Talker::publishMessage(nav_msgs::OccupancyGrid& msg) {
     chatter_publisher_.publish(msg);
+    ROS_INFO_STREAM("Published message");
 }
