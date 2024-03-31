@@ -127,8 +127,6 @@ add_executable(
   laser_scan_to_grid_node 
   src/laser_scan_to_grid_node.cpp
   src/Talker.cpp 
-#  src/Point2D.cpp
-#  src/EOGM.cpp
   src/LaserScanToGrid.cpp
 )
 
