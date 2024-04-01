@@ -32,8 +32,8 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
 
   float start_angle = msg->angle_min + this->getZRotation();
 
-  this->free.resize(width, std::vector<unsigned int>(height, 0));
-  this->occupied.resize(width, std::vector<unsigned int>(height, 0));
+  this->free.resize(width, std::vector<float>(height, 0.0));
+  this->occupied.resize(width, std::vector<float>(height, 0.0));
 // Compute cartesian position of all the points
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < msg->ranges.size(); i++)
@@ -51,7 +51,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
     int x1 = x0 + (int)(range * cos(angle));
     int y1 = y0 + (int)(range * sin(angle));
 #pragma omp critical
-    this->occupied[x1][y1] += 1;
+    this->occupied[x1][y1] = 0.9;
 
     // Bresenham's algorithm
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -64,7 +64,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
       if (x0 != x1 || y0 != y1)
       {
 #pragma omp critical
-        this->free[x0][y0] += 1;
+        this->free[x0][y0] = 0.9;
       }
       if (x0 == x1 && y0 == y1)
         break; // End of the line
@@ -83,12 +83,17 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
   }
 
   EOGM eogm(this->occupied, this->free, this->resolution);
-  nav_msgs::OccupancyGrid grid = eogm.getOccupancyGrid();
-  grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
-  grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
+  nav_msgs::OccupancyGrid occupancy_grid = eogm.getOccupancyGrid();
+  occupancy_grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
+  occupancy_grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
 
-  this->talker_.publishMessage(grid);
-    
+  nav_msgs::OccupancyGrid free_grid = eogm.getFreeGrid();
+  free_grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
+  free_grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
+
+  this->talker_.publishMessage(occupancy_grid);
+  //this->talker_.publishMessage(free_grid);
+
   this->free.clear();
   this->occupied.clear();
 
