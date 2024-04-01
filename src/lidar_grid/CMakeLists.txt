@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp 
   sensor_msgs
   common
+  tf2
+  tf2_geometry_msgs
 )
 
 find_package(OpenMP)

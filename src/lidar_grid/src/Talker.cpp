@@ -5,7 +5,7 @@ Talker::Talker(ros::NodeHandle& nodehandle): nh_(nodehandle) {
 }
 
 void Talker::initializePublisher() {
-    this->chatter_publisher_ = this->nh_.advertise<nav_msgs::OccupancyGrid>("eogm", 1000);
+    this->chatter_publisher_ = this->nh_.advertise<nav_msgs::OccupancyGrid>("local_eogm", 5);
 }
 
 void Talker::publishMessage(nav_msgs::OccupancyGrid& msg) {
