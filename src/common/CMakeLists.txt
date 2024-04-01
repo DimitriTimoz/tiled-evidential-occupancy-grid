@@ -125,6 +125,7 @@ add_library(${PROJECT_NAME}
 #  src/${PROJECT_NAME}/common.cpp
   src/EOGM.cpp
   src/Point2D.cpp
+  src/BeliefMassFunction.cpp
 )
 
 ## Add cmake target dependencies of the library
