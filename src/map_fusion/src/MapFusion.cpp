@@ -1,36 +1,56 @@
 #include "MapFusion.hpp"
 
 
-MapFusion::MapFusion(ros::NodeHandle &node_handle) : node_handle(node_handle)
+MapFusion::MapFusion(ros::NodeHandle &node_handle) : node_handle(node_handle), global_eogm(60, 60, 0.05)
 {
-    this->eogm_subscriber = this->node_handle.subscribe("/local_eogm", 5, &MapFusion::eogmCallback, this);
+    this->global_eogm_publisher = this->node_handle.advertise<nav_msgs::OccupancyGrid>("global_eogm", 1);
 
-    this->global_eogm_publisher = this->node_handle.advertise<nav_msgs::OccupancyGrid>("global_eogm", 5);
-
+    this->local_occupancy_subscriber = this->node_handle.subscribe("/local_occupancy", 5, &MapFusion::localOccupancyCallback, this);
+    this->local_free_subscriber = this->node_handle.subscribe("/local_free", 5, &MapFusion::localFreeCallback, this);
 }
 
-void MapFusion::eogmCallback(const nav_msgs::OccupancyGridConstPtr &msg)
+void MapFusion::localOccupancyCallback(const nav_msgs::OccupancyGridConstPtr &msg)
+{
+    ROS_INFO_STREAM("Received Local Occupancy Grid");
+
+    this->occupancy_grid = *msg;
+    
+    this->fuse();
+}
+
+void MapFusion::localFreeCallback(const nav_msgs::OccupancyGridConstPtr &msg)
+{
+    ROS_INFO_STREAM("Received Local Free Grid");
+
+    this->free_grid = *msg;
+
+    this->fuse();
+}
+
+void MapFusion::fuse()
 {
     static bool first_time = true;
 
-    ROS_INFO_STREAM("Received EO Grid Map");
+    if (this->occupancy_grid.info.origin.position != this->free_grid.info.origin.position)
+    {
+        ROS_INFO_STREAM("Local Grids have different origins");
+        return;
+    }
 
+    ROS_INFO_STREAM("Fusing Local Grids");
+
+    // Set the origin of the global EOGM
     if (first_time)
     {
-      
+        auto origin_x = this->occupancy_grid.info.origin.position.y - (60 / 2);
+        auto origin_y = this->occupancy_grid.info.origin.position.x - (60 / 2);
+        this->global_eogm.setOrigin(origin_x, origin_y);
         first_time = false;
     }
-      
+
+    EOGM local_eogm(this->occupancy_grid, this->free_grid, 0.05);
+
+    this->global_eogm.fuse(local_eogm);
+
+    this->global_eogm_publisher.publish(this->global_eogm.getOccupancyGrid());
 }
-
-/*
-
-
-std::tuple<double, double> MapFusion::getXYTranslation()
-{
-  double x_translation = this->current_odometry.pose.pose.position.x - this->reference_odometry.pose.pose.position.x;
-  double y_translation = this->current_odometry.pose.pose.position.y - this->reference_odometry.pose.pose.position.y;
-
-  return std::make_tuple(x_translation, y_translation);
-}
-*/

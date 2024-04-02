@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
 
     ros::NodeHandle node_handle;
 
-   // MapFusion map_fusion(node_handle);
+   MapFusion map_fusion(node_handle);
 
     ROS_INFO("Hello, I am a map_fusion_node.");
 

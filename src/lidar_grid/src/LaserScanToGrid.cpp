@@ -1,17 +1,16 @@
 #include "LaserScanToGrid.h"
 #include "common/EOGM.h"
+#include <cmath>
 
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-LaserScanToGrid::LaserScanToGrid(ros::NodeHandle &nodehandle)
+LaserScanToGrid::LaserScanToGrid(ros::NodeHandle &node_handle) : node_handle(node_handle)
 {
-  this->ar_sub_ = nodehandle.subscribe<sensor_msgs::LaserScan>("/scan", 1, &LaserScanToGrid::visionCallback, this);
+  this->odometry_subscriber = node_handle.subscribe("/odom", 1, &LaserScanToGrid::odometryCallback, this);
 
-  this->odometry_subscriber = nodehandle.subscribe("/odom", 1, &LaserScanToGrid::odometryCallback, this);
-
-  this->local_occupancy_publisher = nodehandle.advertise<nav_msgs::OccupancyGrid>("local_occupancy_publisher", 5);
-  this->local_free_publisher = nodehandle.advertise<nav_msgs::OccupancyGrid>("local_free_publisher", 5);
+  this->local_occupancy_publisher = node_handle.advertise<nav_msgs::OccupancyGrid>("local_occupancy", 5);
+  this->local_free_publisher = node_handle.advertise<nav_msgs::OccupancyGrid>("local_free", 5);
 }
 
 double LaserScanToGrid::getZRotation()
@@ -35,8 +34,8 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
 
   float start_angle = msg->angle_min + this->getZRotation();
 
-  this->free.resize(width, std::vector<float>(height, 0.0));
-  this->occupied.resize(width, std::vector<float>(height, 0.0));
+  this->free.resize(width, std::vector<int8_t>(height, 0.0));
+  this->occupied.resize(width, std::vector<int8_t>(height, 0.0));
 // Compute cartesian position of all the points
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < msg->ranges.size(); i++)
@@ -54,7 +53,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
     int x1 = x0 + (int)(range * cos(angle));
     int y1 = y0 + (int)(range * sin(angle));
 #pragma omp critical
-    this->occupied[x1][y1] = 0.9;
+    this->occupied[x1][y1] = EOGM::fromFloatToByte(0.9);
 
     // Bresenham's algorithm
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -67,7 +66,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
       if (x0 != x1 || y0 != y1)
       {
 #pragma omp critical
-        this->free[x0][y0] = 0.9;
+        this->free[x0][y0] = EOGM::fromFloatToByte(0.9);
       }
       if (x0 == x1 && y0 == y1)
         break; // End of the line
@@ -85,17 +84,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
     }
   }
 
-  EOGM eogm(this->occupied, this->free, this->resolution);
-  nav_msgs::OccupancyGrid occupancy_grid = eogm.getOccupancyGrid();
-  occupancy_grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
-  occupancy_grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
-
-  nav_msgs::OccupancyGrid free_grid = eogm.getFreeGrid();
-  free_grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
-  free_grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
-
-  this->local_occupancy_publisher.publish(occupancy_grid);
-  this->local_free_publisher.publish(free_grid);
+  this->publishGrid();
 
   this->free.clear();
   this->occupied.clear();
@@ -103,8 +92,51 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
   ROS_INFO_STREAM(msg);
 }
 
-void LaserScanToGrid::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
+void LaserScanToGrid::publishGrid()
 {
-  this->current_odometry = *msg;
+
+  nav_msgs::OccupancyGrid grid;
+
+  grid.info.resolution = (float)this->resolution;
+  grid.info.width = this->occupied.size();
+  grid.info.height = this->occupied[0].size();
+  grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
+  grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
+  grid.info.origin.position.z = 0;
+  grid.info.origin.orientation.x = 0;
+  grid.info.origin.orientation.y = 0;
+  grid.info.origin.orientation.z = 0;
+  grid.info.origin.orientation.w = 1;
+  // grid_msg.header.frame_id = "occupancy";
+
+  grid.data = flattenMatrix(this->occupied);
+  this->local_occupancy_publisher.publish(grid);
+
+  grid.data = flattenMatrix(this->free);
+  this->local_free_publisher.publish(grid);
 }
 
+template <typename T>
+std::vector<T> flattenMatrix(const std::vector<std::vector<T>> &matrix)
+{
+  std::vector<T> result;
+  result.reserve(matrix.size() * matrix[0].size()); // Preallocate memory
+
+  // - Flatten the matrix
+  for (const auto &row : matrix)
+    for (T element : row)
+      result.push_back(element);
+  return result;
+}
+
+void LaserScanToGrid::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
+{
+  static bool first_time = true;
+
+  this->current_odometry = *msg;
+
+  if (first_time)
+  {
+    this->ar_sub_ = this->node_handle.subscribe<sensor_msgs::LaserScan>("/scan", 1, &LaserScanToGrid::visionCallback, this);
+  }
+}

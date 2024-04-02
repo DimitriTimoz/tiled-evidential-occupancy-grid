@@ -30,7 +30,7 @@ public:
     float getOccupancyProbability() const;
 
     // - - Operators
-    BeliefMassFunction &operator+=(const BeliefMassFunction &other);
+    BeliefMassFunction &operator+=(BeliefMassFunction const &other);
     BeliefMassFunction operator+(const BeliefMassFunction &other) const;
 
 private:

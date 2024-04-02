@@ -118,7 +118,7 @@ BeliefMassFunction BeliefMassFunction::operator+(const BeliefMassFunction &other
     return result;
 }
 
-BeliefMassFunction &BeliefMassFunction::operator+=(const BeliefMassFunction &other)
+BeliefMassFunction &BeliefMassFunction::operator+=(BeliefMassFunction const &other)
 {
     return *this = *this + other;
 }

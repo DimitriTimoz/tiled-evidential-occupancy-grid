@@ -5,6 +5,7 @@
 #include "Point2D.h"
 #include "BeliefMassFunction.h"
 #include <nav_msgs/OccupancyGrid.h>
+#include <tuple>
 
 using namespace std;
 
@@ -14,6 +15,8 @@ public:
     EOGM() = default;
     EOGM(unsigned int width, unsigned int height, float resolution);
     EOGM(vector<std::vector<float>> occupied, vector<std::vector<float>> free, float resolution);
+    EOGM(nav_msgs::OccupancyGrid occupancy_grid, nav_msgs::OccupancyGrid free_grid, float resolution);
+
     ~EOGM() = default;
 
     /// Get the grid as a map of points to cell states (occupied, free, unknown)
@@ -23,10 +26,18 @@ public:
     nav_msgs::OccupancyGrid getOccupancyGrid();
     nav_msgs::OccupancyGrid getFreeGrid();
 
+    void setOrigin(double x, double y);
 
+    void fuse(const EOGM &other);
+
+    static int8_t fromFloatToByte(float);
+    static float fromByteToFloat(int8_t);
+
+    tuple<size_t, size_t> fromCoordinateToIndex(double x, double y);
 
 private:
     vector<std::vector<BeliefMassFunction>> grid;
 
+    double origin_x, origin_y;
     float resolution;
 };
