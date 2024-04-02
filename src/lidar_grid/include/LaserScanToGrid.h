@@ -15,8 +15,6 @@ public:
   // - - Callbacks
   void visionCallback(const sensor_msgs::LaserScanConstPtr& msg);
 
-  
-
 private:
   // - Methods
   nav_msgs::OccupancyGrid getOccupancyGrid();
@@ -33,7 +31,7 @@ private:
   ros::Subscriber odometry_subscriber;
   Talker talker_;
   // Grid 
-  std::vector<std::vector<unsigned int>> occupied;
-  std::vector<std::vector<unsigned int>> free;
+  std::vector<std::vector<float>> occupied;
+  std::vector<std::vector<float>> free;
   float resolution = 0.05;
 };
