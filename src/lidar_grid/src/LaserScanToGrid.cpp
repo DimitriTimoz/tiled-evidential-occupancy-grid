@@ -4,11 +4,14 @@
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-LaserScanToGrid::LaserScanToGrid(ros::NodeHandle &nodehandle) : talker_(nodehandle)
+LaserScanToGrid::LaserScanToGrid(ros::NodeHandle &nodehandle)
 {
   this->ar_sub_ = nodehandle.subscribe<sensor_msgs::LaserScan>("/scan", 1, &LaserScanToGrid::visionCallback, this);
 
   this->odometry_subscriber = nodehandle.subscribe("/odom", 1, &LaserScanToGrid::odometryCallback, this);
+
+  this->local_occupancy_publisher = nodehandle.advertise<nav_msgs::OccupancyGrid>("local_occupancy_publisher", 5);
+  this->local_free_publisher = nodehandle.advertise<nav_msgs::OccupancyGrid>("local_free_publisher", 5);
 }
 
 double LaserScanToGrid::getZRotation()
@@ -91,8 +94,8 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
   free_grid.info.origin.position.x = this->current_odometry.pose.pose.position.y;
   free_grid.info.origin.position.y = this->current_odometry.pose.pose.position.x;
 
-  this->talker_.publishMessage(occupancy_grid);
-  //this->talker_.publishMessage(free_grid);
+  this->local_occupancy_publisher.publish(occupancy_grid);
+  this->local_free_publisher.publish(free_grid);
 
   this->free.clear();
   this->occupied.clear();

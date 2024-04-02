@@ -20,8 +20,7 @@ void MapFusion::eogmCallback(const nav_msgs::OccupancyGridConstPtr &msg)
       
         first_time = false;
     }
-
-  
+      
 }
 
 /*

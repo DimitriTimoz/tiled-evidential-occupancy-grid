@@ -15,8 +15,10 @@ EOGM::EOGM(vector<std::vector<float>> occupied, vector<std::vector<float>> free,
     {
         for (int y = 0; y < occupied[0].size(); y++)
         {
-            this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::OCCUPIED, occupied[x][y]);
-            this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::FREE, free[x][y]);
+            if (occupied[x][y] > free[x][y])
+                this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::OCCUPIED, occupied[x][y]);
+            else
+                this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::FREE, free[x][y]);
         }
     }
 }
@@ -50,7 +52,7 @@ nav_msgs::OccupancyGrid EOGM::getOccupancyGrid()
     grid_msg.info.origin.orientation.y = 0;
     grid_msg.info.origin.orientation.z = 0;
     grid_msg.info.origin.orientation.w = 1;
-    grid_msg.header.frame_id = "occupancy";
+    //grid_msg.header.frame_id = "occupancy";
 
     vector<int8_t> data;
 
@@ -77,7 +79,7 @@ nav_msgs::OccupancyGrid EOGM::getFreeGrid()
     grid_msg.info.origin.orientation.y = 0;
     grid_msg.info.origin.orientation.z = 0;
     grid_msg.info.origin.orientation.w = 1;
-    grid_msg.header.frame_id = "free";
+    //grid_msg.header.frame_id = "free";
 
     vector<int8_t> data;
 

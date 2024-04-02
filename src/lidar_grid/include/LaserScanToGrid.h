@@ -29,7 +29,7 @@ private:
 
   ros::Subscriber ar_sub_;
   ros::Subscriber odometry_subscriber;
-  Talker talker_;
+  ros::Publisher local_occupancy_publisher, local_free_publisher;
   // Grid 
   std::vector<std::vector<float>> occupied;
   std::vector<std::vector<float>> free;
