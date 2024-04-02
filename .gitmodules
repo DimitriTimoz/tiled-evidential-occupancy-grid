@@ -1,0 +1,3 @@
+[submodule "ros-bags"]
+	path = ros-bags
+	url = https://github.com/joshvillbrandt/ros-bags
