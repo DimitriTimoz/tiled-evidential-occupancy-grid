@@ -60,7 +60,6 @@ float BeliefMassFunction::getConjunctionLevel(const BeliefMassFunction &other, S
 }
 
 #define VECTORIZE(a, state) _mm256_set_ps(a[0]->getMass(state), a[1]->getMass(state), a[2]->getMass(state), a[3]->getMass(state), a[4]->getMass(state), a[5]->getMass(state), a[6]->getMass(state), a[7]->getMass(state))
-#define DEVECTORIZE(a_vector, a, state) { float a_vector_array[8]; _mm256_storeu_ps(a_vector_array, a_vector); for (int i = 0; i < 8; i++) { a[i]->setMass(state, a_vector_array[i]); } }
 
 void BeliefMassFunction::computeConjunctionLevels(BeliefMassFunction *a[8], const BeliefMassFunction *b[8])
 {
@@ -74,56 +73,64 @@ void BeliefMassFunction::computeConjunctionLevels(BeliefMassFunction *a[8], cons
 
     __m256 a_vector = VECTORIZE(a, State::FREE);
     __m256 b_vector = VECTORIZE(b, State::FREE);
-    __m256 result = _mm256_mul_ps(a_vector, b_vector);
+    __m256 free_result = _mm256_mul_ps(a_vector, b_vector);
 
     a_vector = VECTORIZE(a, State::FREE);
     b_vector = VECTORIZE(b, State::UNKNOWN);
-    result = _mm256_fmadd_ps(a_vector, b_vector, result);
+    free_result = _mm256_fmadd_ps(a_vector, b_vector, free_result);
 
     a_vector = VECTORIZE(a, State::UNKNOWN);
     b_vector = VECTORIZE(b, State::FREE);
-    result = _mm256_fmadd_ps(a_vector, b_vector, result);
-
-    DEVECTORIZE(result, a, State::FREE);
+    
+    free_result = _mm256_fmadd_ps(a_vector, b_vector, free_result);
 
     // - Occupied
 
     a_vector = VECTORIZE(a, State::OCCUPIED);
     b_vector = VECTORIZE(b, State::OCCUPIED);
-    result = _mm256_mul_ps(a_vector, b_vector);
-
+    __m256 occupied_result = _mm256_mul_ps(a_vector, b_vector);
 
     a_vector = VECTORIZE(a, State::OCCUPIED);
     b_vector = VECTORIZE(b, State::UNKNOWN);
-    result = _mm256_fmadd_ps(a_vector, b_vector, result);
+    occupied_result = _mm256_fmadd_ps(a_vector, b_vector, occupied_result);
 
     a_vector = VECTORIZE(a, State::UNKNOWN);
     b_vector = VECTORIZE(b, State::OCCUPIED);
-    result = _mm256_fmadd_ps(a_vector, b_vector, result);
-
-    DEVECTORIZE(result, a, State::OCCUPIED);
+    occupied_result = _mm256_fmadd_ps(a_vector, b_vector, occupied_result);
 
     // - Conflict
 
     a_vector = VECTORIZE(a, State::FREE);
     b_vector = VECTORIZE(b, State::OCCUPIED);
-    result = _mm256_mul_ps(a_vector, b_vector);
+    __m256 conflict_result = _mm256_mul_ps(a_vector, b_vector);
 
     a_vector = VECTORIZE(a, State::OCCUPIED);
     b_vector = VECTORIZE(b, State::FREE);
-    result = _mm256_fmadd_ps(a_vector, b_vector, result);
-
-    DEVECTORIZE(result, a, State::CONFLICT);
+    conflict_result = _mm256_fmadd_ps(a_vector, b_vector, conflict_result);
 
     // - Unknown
 
     a_vector = VECTORIZE(a, State::UNKNOWN);
     b_vector = VECTORIZE(b, State::UNKNOWN);
-    result = _mm256_mul_ps(a_vector, b_vector);
+    __m256 unknown_result = _mm256_mul_ps(a_vector, b_vector);
 
-    DEVECTORIZE(result, a, State::UNKNOWN);
+
+    alignas(32) float results[4][8];
+    _mm256_store_ps(results[0], free_result);
+    _mm256_store_ps(results[1], occupied_result);
+    _mm256_store_ps(results[2], conflict_result);
+    _mm256_store_ps(results[3], unknown_result);
+
+    for (int i = 0; i < 8; i++)
+    {
+        int j = 7 - i;
+        a[j]->setMass(State::FREE, results[0][i]);
+        a[j]->setMass(State::OCCUPIED, results[1][i]);
+        a[j]->setMass(State::CONFLICT, results[2][i]);
+        a[j]->setMass(State::UNKNOWN, results[3][i]);
+    }
+
 }
-
 
 BeliefMassFunction BeliefMassFunction::operator+(const BeliefMassFunction &other) const
 {

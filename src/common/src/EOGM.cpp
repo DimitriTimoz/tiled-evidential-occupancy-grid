@@ -150,9 +150,7 @@ void EOGM::fuse(const EOGM &other)
     int32_t x_offset = (other.x - this->x) / this->resolution;
     int32_t y_offset = (other.y - this->y) / this->resolution;
 
-    BeliefMassFunction placeholders[8]; // Placeholder for the last conjunctions
-
-    ROS_INFO_STREAM("a : " << this->grid[this->grid.size()/2][this->grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED) << " b : " << other.grid[other.grid.size()/2][other.grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED));
+    BeliefMassFunction placeholders[8];
 
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < other.grid.size(); i++)
@@ -200,8 +198,9 @@ void EOGM::fuse(const EOGM &other)
             }
 
             BeliefMassFunction::computeConjunctionLevels(a, b);
+
+            memset(a, 0, 8 * sizeof(BeliefMassFunction *));
+            memset(b, 0, 8 * sizeof(BeliefMassFunction *));
         }
     }
-
-    ROS_INFO_STREAM("res a : " << this->grid[this->grid.size()/2][this->grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED) << " b : " << other.grid[other.grid.size()/2][other.grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED));
 }

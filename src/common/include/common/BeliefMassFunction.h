@@ -1,4 +1,4 @@
-
+#include <string>
 
 class BeliefMassFunction
 {
@@ -37,7 +37,6 @@ public:
     float getFreeProbability() const;
     // Optimized version of computeConjunctionLevels using AVX2
     static void computeConjunctionLevels(BeliefMassFunction* [8], const BeliefMassFunction* [8]);  
-
 
     // - - Operators
     BeliefMassFunction &operator+=(BeliefMassFunction const &other);
