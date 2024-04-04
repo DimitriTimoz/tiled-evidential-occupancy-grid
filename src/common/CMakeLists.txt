@@ -10,6 +10,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  octomap
 )
 
 ## System dependencies are found with CMake's conventions
@@ -117,6 +118,7 @@ INCLUDE_DIRS include
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIRS}
   include
 )
 
@@ -151,6 +153,7 @@ add_executable(${PROJECT_NAME}_node src/common_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
 )
 
 #############
