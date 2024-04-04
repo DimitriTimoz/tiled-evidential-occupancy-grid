@@ -1,5 +1,6 @@
 #include "MapFusion.hpp"
 
+#include <chrono>
 
 MapFusion::MapFusion(ros::NodeHandle &node_handle) : node_handle(node_handle), global_eogm(60, 60, 0.05)
 {
@@ -14,7 +15,7 @@ void MapFusion::localOccupancyCallback(const nav_msgs::OccupancyGridConstPtr &ms
     ROS_INFO_STREAM("Received Local Occupancy Grid");
 
     this->occupancy_grid = *msg;
-    
+
     this->fuse();
 }
 
@@ -32,12 +33,11 @@ void MapFusion::fuse()
     static bool first_time = true;
 
     if (this->occupancy_grid.info.origin.position != this->free_grid.info.origin.position)
-    {
-        ROS_INFO_STREAM("Local Grids have different origins");
         return;
-    }
 
     ROS_INFO_STREAM("Fusing Local Grids");
+
+    auto total_fuse = std::chrono::high_resolution_clock::now();
 
     // Set the origin of the global EOGM
     if (first_time)
@@ -48,9 +48,15 @@ void MapFusion::fuse()
         first_time = false;
     }
 
+    auto start_2 = std::chrono::high_resolution_clock::now();
     EOGM local_eogm(this->occupancy_grid, this->free_grid, 0.05);
+    ROS_INFO_STREAM("Created Local EOGM in " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_2).count() << "ms");
 
+    auto start = std::chrono::high_resolution_clock::now();
     this->global_eogm.fuse(local_eogm);
+    ROS_INFO_STREAM("Fused Local Grids in " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() << "ms");
 
     this->global_eogm_publisher.publish(this->global_eogm.getOccupancyGrid());
+
+    ROS_INFO_STREAM("Fused total in " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - total_fuse).count() << "ms");
 }

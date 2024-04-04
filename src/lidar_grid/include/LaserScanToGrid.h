@@ -2,10 +2,10 @@
 
 #include <vector>
 #include "ros/ros.h"
-#include "Talker.h"
 #include "common/Point2D.h"
 #include <sensor_msgs/LaserScan.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/OccupancyGrid.h>
 
 class LaserScanToGrid
 {

@@ -2,14 +2,14 @@
 #include <cmath>
 #include <ros/ros.h>
 
-EOGM::EOGM(unsigned int width, unsigned int height, float resolution) : resolution(resolution), origin_x(0), origin_y(0)
+EOGM::EOGM(unsigned int width, unsigned int height, float resolution) : resolution(resolution), x(0), y(0)
 {
-    this->grid = vector<std::vector<BeliefMassFunction>>(width / resolution, vector<BeliefMassFunction>(height / resolution, BeliefMassFunction()));
+    this->grid = std::vector<std::vector<BeliefMassFunction>>(width / resolution, std::vector<BeliefMassFunction>(height / resolution, BeliefMassFunction()));
 }
 
-EOGM::EOGM(vector<std::vector<float>> occupied, vector<std::vector<float>> free, float resolution) : resolution(resolution)
+EOGM::EOGM(std::vector<std::vector<float>> occupied, std::vector<std::vector<float>> free, float resolution) : resolution(resolution)
 {
-    this->grid = vector<std::vector<BeliefMassFunction>>(occupied.size(), vector<BeliefMassFunction>(occupied[0].size(), BeliefMassFunction()));
+    this->grid = std::vector<std::vector<BeliefMassFunction>>(occupied.size(), std::vector<BeliefMassFunction>(occupied[0].size(), BeliefMassFunction()));
 
     for (int x = 0; x < occupied.size(); x++)
     {
@@ -54,9 +54,9 @@ EOGM::EOGM(nav_msgs::OccupancyGrid occupancy_grid, nav_msgs::OccupancyGrid free_
     }
 }
 
-map<Point2D, BeliefMassFunction> EOGM::getGrid(float rotation_matrix[2][2], float translation_vector[2])
+std::map<Point2D, BeliefMassFunction> EOGM::getGrid(float rotation_matrix[2][2], float translation_vector[2])
 {
-    map<Point2D, BeliefMassFunction> grid_map;
+    std::map<Point2D, BeliefMassFunction> grid_map;
     Point2D translation((int)round(translation_vector[0]), (int)round(translation_vector[1]));
 
     for (int x = 0; x < this->grid.size(); x++)
@@ -85,12 +85,12 @@ nav_msgs::OccupancyGrid EOGM::getOccupancyGrid()
     grid_msg.info.origin.orientation.w = 1;
     // grid_msg.header.frame_id = "occupancy";
 
-    vector<int8_t> data;
+    std::vector<int8_t> data;
     data.reserve(this->grid.size() * this->grid[0].size());
 
     for (int x = 0; x < this->grid.size(); x++)
         for (int y = 0; y < this->grid[0].size(); y++)
-            data.push_back(int(this->grid[x][y].getMass(BeliefMassFunction::State::OCCUPIED)*100));
+            data.push_back(int(this->grid[x][y].getOccupancyProbability() * 100));
 
     grid_msg.data = data;
 
@@ -112,11 +112,11 @@ nav_msgs::OccupancyGrid EOGM::getFreeGrid()
     grid_msg.info.origin.orientation.w = 1;
     // grid_msg.header.frame_id = "free";
 
-    vector<int8_t> data;
+    std::vector<int8_t> data;
 
     for (int x = 0; x < this->grid.size(); x++)
         for (int y = 0; y < this->grid[0].size(); y++)
-            data.push_back(int8_t(this->grid[x][y].getMass(BeliefMassFunction::State::FREE) * 100));
+            data.push_back(int8_t(this->grid[x][y].getFreeProbability()));
 
     grid_msg.data = data;
 
@@ -125,8 +125,8 @@ nav_msgs::OccupancyGrid EOGM::getFreeGrid()
 
 void EOGM::setOrigin(double x, double y)
 {
-    this->origin_x = x;
-    this->origin_y = y;
+    this->x = x;
+    this->y = y;
 }
 
 int8_t EOGM::fromFloatToByte(float value)
@@ -147,27 +147,61 @@ void EOGM::fuse(const EOGM &other)
         return;
     }
 
-    ROS_INFO("Fusing grids : %f, %f | %f, %f", other.origin_x, other.origin_y, this->origin_x, this->origin_y);
+    int32_t x_offset = (other.x - this->x) / this->resolution;
+    int32_t y_offset = (other.y - this->y) / this->resolution;
 
-    int32_t x_offset = (other.origin_x - this->origin_x) / this->resolution;
-    int32_t y_offset = (other.origin_y - this->origin_y) / this->resolution;
+    BeliefMassFunction placeholders[8]; // Placeholder for the last conjunctions
 
-    ROS_INFO("Fusing grids with offsets: %d, %d", x_offset, y_offset);
+    ROS_INFO_STREAM("a : " << this->grid[this->grid.size()/2][this->grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED) << " b : " << other.grid[other.grid.size()/2][other.grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED));
 
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < other.grid.size(); i++)
     {
+        // - Accumulate the conjunctions in batches of 8
+        BeliefMassFunction *a[8];
+        const BeliefMassFunction *b[8];
+        int m = 0;
+
+        int32_t k = i + x_offset;
+
+        if (k < 0 || k >= this->grid.size())
+            continue;
+
         for (size_t j = 0; j < other.grid[0].size(); j++)
         {
-            int32_t k = i + x_offset;
             int32_t l = j + y_offset;
 
             // Ignore points outside the grid
-            if (k < 0 || k >= this->grid.size() || l < 0 || l >= this->grid[0].size())
+            if (l < 0 || l >= this->grid[0].size())
                 continue;
 
-#pragma omp critical
-            this->grid[k][l] += other.grid[i][j];
+            a[m] = &this->grid[k][l];
+            b[m] = &other.grid[i][j];
+            m++;
+
+            // Compute the conjunctions in batches of 8
+            if (m >= 8)
+            {
+                BeliefMassFunction::computeConjunctionLevels(a, b);
+                m = 0;
+                memset(a, 0, 8 * sizeof(BeliefMassFunction *));
+                memset(b, 0, 8 * sizeof(BeliefMassFunction *));
+            }
+        }
+
+        // Flush the remaining conjunctions
+        if (m > 0)
+        {
+            // Fill the rest of the array with placeholders
+            for (; m < 8; m++)
+            {
+                a[m] = &placeholders[m];
+                b[m] = &placeholders[m];
+            }
+
+            BeliefMassFunction::computeConjunctionLevels(a, b);
         }
     }
+
+    ROS_INFO_STREAM("res a : " << this->grid[this->grid.size()/2][this->grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED) << " b : " << other.grid[other.grid.size()/2][other.grid[0].size()/2].getMass(BeliefMassFunction::State::OCCUPIED));
 }

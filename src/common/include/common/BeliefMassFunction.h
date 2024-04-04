@@ -5,10 +5,10 @@ class BeliefMassFunction
 public:
     enum class State
     {
-        FREE = 0,   // F
-        OCCUPIED,   // O
-        UNKNOWN,    // Omega
-        CONFLICT,   // Empty set
+        FREE = 0, // F
+        OCCUPIED, // O
+        UNKNOWN,  // Omega
+        CONFLICT, // Empty set
     };
 
     // - Methods
@@ -21,13 +21,23 @@ public:
     ~BeliefMassFunction() = default;
 
     // - - Setters
-    void setMass(State state, float mass);
+    inline void setMass(State state, float mass)
+    {
+        this->masses[static_cast<int>(state)] = mass;
+    }
 
     // - - Getters
-    float getConjunctionLevel(const BeliefMassFunction& other, State state) const;
-    float getMass(State state) const;
+    inline float getMass(State state) const
+    {
+        return this->masses[static_cast<int>(state)];
+    }
+    float getConjunctionLevel(const BeliefMassFunction &other, State state) const;
     State getState() const;
     float getOccupancyProbability() const;
+    float getFreeProbability() const;
+    // Optimized version of computeConjunctionLevels using AVX2
+    static void computeConjunctionLevels(BeliefMassFunction* [8], const BeliefMassFunction* [8]);  
+
 
     // - - Operators
     BeliefMassFunction &operator+=(BeliefMassFunction const &other);

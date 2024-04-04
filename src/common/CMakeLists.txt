@@ -217,3 +217,5 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 # endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native") # Enable AVX2

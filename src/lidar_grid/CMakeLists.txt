@@ -135,7 +135,6 @@ include_directories(
 add_executable(
   laser_scan_to_grid_node 
   src/laser_scan_to_grid_node.cpp
-  src/Talker.cpp 
   src/LaserScanToGrid.cpp
 )
 
@@ -225,3 +224,4 @@ target_link_libraries(laser_scan_to_grid_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
