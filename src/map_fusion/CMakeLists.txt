@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   common
   tf2
   tf2_geometry_msgs
-
+  octomap_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -107,6 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
+
 # LIBRARIES map_fusion
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
@@ -121,6 +122,7 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
+ ${OCTOMAP_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -155,6 +157,7 @@ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
 )
 
 #############

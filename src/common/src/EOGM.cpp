@@ -5,6 +5,12 @@
 EOGM::EOGM(unsigned int width, unsigned int height, float resolution) : resolution(resolution), x(0), y(0)
 {
     this->grid = std::vector<std::vector<BeliefMassFunction>>(width / resolution, std::vector<BeliefMassFunction>(height / resolution, BeliefMassFunction()));
+    this->tree = new octomap::OcTree(1);
+}
+
+EOGM::~EOGM()
+{
+    delete tree;
 }
 
 EOGM::EOGM(std::vector<std::vector<float>> occupied, std::vector<std::vector<float>> free, float resolution) : resolution(resolution)
@@ -15,7 +21,9 @@ EOGM::EOGM(std::vector<std::vector<float>> occupied, std::vector<std::vector<flo
     {
         for (int y = 0; y < occupied[0].size(); y++)
         {
-            if (occupied[x][y] > free[x][y])
+            if (occupied[x][y] == free[x][y])
+                this->grid[x][y] = BeliefMassFunction();
+            else if (occupied[x][y] > free[x][y])
                 this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::OCCUPIED, occupied[x][y]);
             else
                 this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::FREE, free[x][y]);
@@ -203,4 +211,23 @@ void EOGM::fuse(const EOGM &other)
             memset(b, 0, 8 * sizeof(BeliefMassFunction *));
         }
     }
+}
+
+octomap::OcTree &EOGM::getOctomap()
+{
+    for (int x = 0; x < this->grid.size(); x++)
+    {
+        for (int y = 0; y < this->grid[0].size(); y++)
+        {
+            if (this->grid[x][y].getMass(BeliefMassFunction::State::OCCUPIED) == 0)
+                continue;
+
+            float occupancy = this->grid[x][y].getMass(BeliefMassFunction::State::FREE);
+            this->tree->updateNode(octomap::point3d(x, y, occupancy), this->grid[x][y].getMass(BeliefMassFunction::State::OCCUPIED) != 0);
+            ROS_INFO_STREAM("Updating node at " << x << ", " << y << " with occupancy " << occupancy);
+
+        }
+    }
+    tree->prune();
+    return *tree;
 }

@@ -6,6 +6,7 @@
 #include "BeliefMassFunction.h"
 #include <nav_msgs/OccupancyGrid.h>
 #include <tuple>
+#include <octomap/OcTree.h>
 
 class EOGM
 {
@@ -15,7 +16,7 @@ public:
     EOGM(std::vector<std::vector<float>> occupied, std::vector<std::vector<float>> free, float resolution);
     EOGM(nav_msgs::OccupancyGrid occupancy_grid, nav_msgs::OccupancyGrid free_grid, float resolution);
 
-    ~EOGM() = default;
+    ~EOGM();
 
     /// Get the grid as a map of points to cell states (occupied, free, unknown)
     /// @param rotation_matrix The rotation matrix of the robot according to the origin
@@ -23,6 +24,7 @@ public:
     std::map<Point2D, BeliefMassFunction> getGrid(float rotation_matrix[2][2], float translation_vector[2]);
     nav_msgs::OccupancyGrid getOccupancyGrid();
     nav_msgs::OccupancyGrid getFreeGrid();
+    octomap::OcTree& getOctomap();
 
     void setOrigin(double x, double y);
 
@@ -38,4 +40,5 @@ private:
 
     double x, y;
     float resolution;
+    octomap::OcTree* tree;
 };
