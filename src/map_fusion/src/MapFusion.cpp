@@ -21,8 +21,6 @@ void MapFusion::localOccupancyCallback(const nav_msgs::OccupancyGridConstPtr &ms
 
 void MapFusion::localFreeCallback(const nav_msgs::OccupancyGridConstPtr &msg)
 {
-    ROS_INFO_STREAM("Received Local Free Grid");
-
     this->free_grid = *msg;
 
     this->fuse();

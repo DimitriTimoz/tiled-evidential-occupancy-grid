@@ -53,7 +53,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
     int x1 = x0 + (int)(range * cos(angle));
     int y1 = y0 + (int)(range * sin(angle));
 #pragma omp critical
-    this->occupied[x1][y1] = EOGM::fromFloatToByte(0.9);
+    this->occupied[x1][y1] = EOGM::fromFloatToByte(0.7);
 
     // Bresenham's algorithm
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -66,7 +66,7 @@ void LaserScanToGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)
       if (x0 != x1 || y0 != y1)
       {
 #pragma omp critical
-        this->free[x0][y0] = EOGM::fromFloatToByte(0.9);
+        this->free[x0][y0] = EOGM::fromFloatToByte(0.7);
       }
       if (x0 == x1 && y0 == y1)
         break; // End of the line

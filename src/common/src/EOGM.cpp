@@ -5,7 +5,7 @@
 EOGM::EOGM(unsigned int width, unsigned int height, float resolution) : resolution(resolution), x(0), y(0)
 {
     this->grid = std::vector<std::vector<BeliefMassFunction>>(width / resolution, std::vector<BeliefMassFunction>(height / resolution, BeliefMassFunction()));
-    this->tree = new octomap::OcTree(1);
+    this->tree = new octomap::ColorOcTree(1);
 }
 
 EOGM::~EOGM()
@@ -54,10 +54,15 @@ EOGM::EOGM(nav_msgs::OccupancyGrid occupancy_grid, nav_msgs::OccupancyGrid free_
     {
         for (int y = 0; y < occupancy_grid.info.height; y++)
         {
-            if (occupancy_grid.data[x + (y * width)] > free_grid.data[x + (y * width)])
-                this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::OCCUPIED, EOGM::fromByteToFloat(occupancy_grid.data[x + y * width]));
+            int8_t occupancy = occupancy_grid.data[x + (y * width)];
+            int8_t free = free_grid.data[x + (y * width)];
+
+            if (occupancy == free)
+                this->grid[x][y] = BeliefMassFunction();
+            else if (occupancy > free)
+                this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::OCCUPIED, EOGM::fromByteToFloat(occupancy));
             else
-                this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::FREE, EOGM::fromByteToFloat(free_grid.data[x + y * width]));
+                this->grid[x][y] = BeliefMassFunction(BeliefMassFunction::State::FREE, EOGM::fromByteToFloat(free));
         }
     }
 }
@@ -137,16 +142,6 @@ void EOGM::setOrigin(double x, double y)
     this->y = y;
 }
 
-int8_t EOGM::fromFloatToByte(float value)
-{
-    return static_cast<int8_t>(std::round((value * 0xFF) + INT8_MIN));
-}
-
-float EOGM::fromByteToFloat(int8_t value)
-{
-    return (static_cast<float>(value) - INT8_MIN) / 0xFF;
-}
-
 void EOGM::fuse(const EOGM &other)
 {
     if (other.resolution != this->resolution)
@@ -155,8 +150,8 @@ void EOGM::fuse(const EOGM &other)
         return;
     }
 
-    int32_t x_offset = (other.x - this->x) / this->resolution;
-    int32_t y_offset = (other.y - this->y) / this->resolution;
+    int x_offset = (other.x - this->x) / this->resolution;
+    int y_offset = (other.y - this->y) / this->resolution;
 
     BeliefMassFunction placeholders[8];
 
@@ -166,16 +161,22 @@ void EOGM::fuse(const EOGM &other)
         // - Accumulate the conjunctions in batches of 8
         BeliefMassFunction *a[8];
         const BeliefMassFunction *b[8];
+        octomap::point3d points[8];
         int m = 0;
 
-        int32_t k = i + x_offset;
+        int k = i + x_offset;
 
+        // Ignore points outside the grid
         if (k < 0 || k >= this->grid.size())
             continue;
 
         for (size_t j = 0; j < other.grid[0].size(); j++)
         {
-            int32_t l = j + y_offset;
+            int l = j + y_offset;
+
+            // Ignore points with a mass of 1
+            if (other.grid[i][j].getMass(BeliefMassFunction::State::UNKNOWN) == 1)
+                continue;
 
             // Ignore points outside the grid
             if (l < 0 || l >= this->grid[0].size())
@@ -183,12 +184,16 @@ void EOGM::fuse(const EOGM &other)
 
             a[m] = &this->grid[k][l];
             b[m] = &other.grid[i][j];
+            points[m] = octomap::point3d(k, l, 0);
             m++;
 
             // Compute the conjunctions in batches of 8
             if (m >= 8)
             {
                 BeliefMassFunction::computeConjunctionLevels(a, b);
+
+                this->updateOctomap(points, (const BeliefMassFunction **)a, 8);
+
                 m = 0;
                 memset(a, 0, 8 * sizeof(BeliefMassFunction *));
                 memset(b, 0, 8 * sizeof(BeliefMassFunction *));
@@ -199,35 +204,79 @@ void EOGM::fuse(const EOGM &other)
         if (m > 0)
         {
             // Fill the rest of the array with placeholders
-            for (; m < 8; m++)
+            for (int n = m; n < 8; n++)
             {
-                a[m] = &placeholders[m];
-                b[m] = &placeholders[m];
+                a[n] = &placeholders[n];
+                b[n] = &placeholders[n];
             }
 
             BeliefMassFunction::computeConjunctionLevels(a, b);
+
+            this->updateOctomap(points, (const BeliefMassFunction **)a, m);
 
             memset(a, 0, 8 * sizeof(BeliefMassFunction *));
             memset(b, 0, 8 * sizeof(BeliefMassFunction *));
         }
     }
+
+    // this->tree->updateInnerOccupancy();
 }
 
-octomap::OcTree &EOGM::getOctomap()
+octomap::ColorOcTree &EOGM::getOctomap()
 {
-    for (int x = 0; x < this->grid.size(); x++)
+    return *this->tree;
+}
+
+void EOGM::updateOctomap(int x, int y, const BeliefMassFunction *mass)
+{
+    float free = mass->getMass(BeliefMassFunction::State::FREE);
+    float occupancy = mass->getMass(BeliefMassFunction::State::OCCUPIED);
+    float conflict = mass->getMass(BeliefMassFunction::State::CONFLICT);
+
+    if (conflict > 0)
     {
-        for (int y = 0; y < this->grid[0].size(); y++)
-        {
-            if (this->grid[x][y].getMass(BeliefMassFunction::State::OCCUPIED) == 0)
-                continue;
+        conflict = std::ceil(conflict * 10);
 
-            float occupancy = this->grid[x][y].getMass(BeliefMassFunction::State::FREE);
-            this->tree->updateNode(octomap::point3d(x, y, occupancy), this->grid[x][y].getMass(BeliefMassFunction::State::OCCUPIED) != 0);
-            ROS_INFO_STREAM("Updating node at " << x << ", " << y << " with occupancy " << occupancy);
-
-        }
+        for (int i = 0; i < conflict; i++)
+            this->tree->updateNode(octomap::point3d(x, y, i), true, false)->setColor(this->conflict_color);
+        for (int i = conflict; i < 10; i++)
+            this->tree->updateNode(octomap::point3d(x, y, i), false, false);
     }
-    tree->prune();
-    return *tree;
+    else if (occupancy > free)
+    {
+        occupancy = std::ceil(mass->getOccupancyProbability() * 10);
+
+        for (int i = 0; i < occupancy; i++)
+            this->tree->updateNode(octomap::point3d(x, y, i), true, false)->setColor(this->occupied_color);
+        for (int i = occupancy; i < 10; i++)
+            this->tree->updateNode(octomap::point3d(x, y, i), false, false);
+        
+        ROS_INFO_STREAM("Updated Octomap at " << x << ", " << y << " with " << mass->getOccupancyProbability() << "%");
+    }
+    else
+    {
+        free = std::ceil(mass->getFreeProbability() * 10);
+
+        for (int i = 0; i < free; i++)
+            this->tree->updateNode(octomap::point3d(x, y, i), true, false)->setColor(this->free_color);
+        for (int i = free; i < 10; i++)
+            this->tree->updateNode(octomap::point3d(x, y, i), false, false);
+    
+        //ROS_INFO_STREAM("Updated Octomap at " << x << ", " << y << " with " << free << "%");
+    }
+
+}
+
+void EOGM::updateOctomap(octomap::point3d points[], const BeliefMassFunction *masses[], size_t size)
+{
+ //   alignas(32) float probabilities[2][8];
+    
+//    BeliefMassFunction::computeProbabilitiesScaled(masses, probabilities, 10);
+    
+    for (size_t i = 0; i < size; i++)
+    {
+
+
+        this->updateOctomap(points[i].x(), points[i].y(), masses[i]);
+    }
 }
