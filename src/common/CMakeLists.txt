@@ -222,4 +222,4 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #   target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 # endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native") # Enable AVX2
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=haswell") # Enable AVX2
