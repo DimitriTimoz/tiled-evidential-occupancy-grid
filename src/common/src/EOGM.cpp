@@ -192,6 +192,7 @@ void EOGM::fuse(const EOGM &other)
             {
                 BeliefMassFunction::computeConjunctionLevels(a, b);
 
+#pragma omp critical
                 this->updateOctomap(points, (const BeliefMassFunction **)a, 8);
 
                 m = 0;
@@ -212,6 +213,7 @@ void EOGM::fuse(const EOGM &other)
 
             BeliefMassFunction::computeConjunctionLevels(a, b);
 
+#pragma omp critical
             this->updateOctomap(points, (const BeliefMassFunction **)a, m);
 
             memset(a, 0, 8 * sizeof(BeliefMassFunction *));
@@ -219,7 +221,7 @@ void EOGM::fuse(const EOGM &other)
         }
     }
 
-    // this->tree->updateInnerOccupancy();
+    this->tree->prune();
 }
 
 octomap::ColorOcTree &EOGM::getOctomap()
@@ -235,7 +237,7 @@ void EOGM::updateOctomap(int x, int y, const BeliefMassFunction *mass)
 
     if (conflict > 0)
     {
-        conflict = std::ceil(conflict * 10);
+        conflict = conflict * 10;
 
         for (int i = 0; i < conflict; i++)
             this->tree->updateNode(octomap::point3d(x, y, i), true, false)->setColor(this->conflict_color);
@@ -244,39 +246,29 @@ void EOGM::updateOctomap(int x, int y, const BeliefMassFunction *mass)
     }
     else if (occupancy > free)
     {
-        occupancy = std::ceil(mass->getOccupancyProbability() * 10);
+        occupancy = mass->getOccupancyProbability() * 10;
 
         for (int i = 0; i < occupancy; i++)
             this->tree->updateNode(octomap::point3d(x, y, i), true, false)->setColor(this->occupied_color);
         for (int i = occupancy; i < 10; i++)
             this->tree->updateNode(octomap::point3d(x, y, i), false, false);
-        
-        ROS_INFO_STREAM("Updated Octomap at " << x << ", " << y << " with " << mass->getOccupancyProbability() << "%");
     }
     else
     {
-        free = std::ceil(mass->getFreeProbability() * 10);
+        free = mass->getFreeProbability() * 10;
 
         for (int i = 0; i < free; i++)
             this->tree->updateNode(octomap::point3d(x, y, i), true, false)->setColor(this->free_color);
         for (int i = free; i < 10; i++)
             this->tree->updateNode(octomap::point3d(x, y, i), false, false);
-    
-        //ROS_INFO_STREAM("Updated Octomap at " << x << ", " << y << " with " << free << "%");
     }
 
 }
 
 void EOGM::updateOctomap(octomap::point3d points[], const BeliefMassFunction *masses[], size_t size)
 {
- //   alignas(32) float probabilities[2][8];
-    
-//    BeliefMassFunction::computeProbabilitiesScaled(masses, probabilities, 10);
-    
     for (size_t i = 0; i < size; i++)
     {
-
-
         this->updateOctomap(points[i].x(), points[i].y(), masses[i]);
     }
 }
