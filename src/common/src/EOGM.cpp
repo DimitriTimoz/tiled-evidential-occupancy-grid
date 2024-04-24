@@ -184,6 +184,9 @@ void EOGM::fuse(const EOGM &other)
 
             a[m] = &this->grid[k][l];
             b[m] = &other.grid[i][j];
+
+    //        ROS_INFO("Point : %d, %d", k, l);
+
             points[m] = octomap::point3d(k, l, 0);
             m++;
 

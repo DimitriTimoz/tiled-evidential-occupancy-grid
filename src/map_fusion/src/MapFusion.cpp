@@ -2,7 +2,7 @@
 #include <octomap_msgs/conversions.h>
 #include <chrono>
 
-MapFusion::MapFusion(ros::NodeHandle &node_handle) : node_handle(node_handle), global_eogm(60, 60, 0.05)
+MapFusion::MapFusion(ros::NodeHandle &node_handle) : node_handle(node_handle), global_eogm(20, 20, 0.05)
 {
     this->global_eogm_publisher = this->node_handle.advertise<octomap_msgs::Octomap>("global_eogm", 1);
 
@@ -40,8 +40,8 @@ void MapFusion::fuse()
     // Set the origin of the global EOGM
     if (first_time)
     {
-        auto origin_x = this->occupancy_grid.info.origin.position.y - (60 / 2);
-        auto origin_y = this->occupancy_grid.info.origin.position.x - (60 / 2);
+        auto origin_x = this->occupancy_grid.info.origin.position.x - (20 / 2);
+        auto origin_y = this->occupancy_grid.info.origin.position.y - (20 / 2);
         this->global_eogm.setOrigin(origin_x, origin_y);
         first_time = false;
     }
@@ -59,7 +59,7 @@ void MapFusion::fuse()
         ROS_ERROR("Failed to serialize octomap");
     }
     ROS_INFO_STREAM("Frame id: " << global_eogm_msg.header.frame_id);
-    global_eogm_msg.header.frame_id = "map";
+    global_eogm_msg.header.frame_id = "robot_odom";
 
     this->global_eogm_publisher.publish(global_eogm_msg);
 
