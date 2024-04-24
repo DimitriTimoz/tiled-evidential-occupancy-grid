@@ -189,3 +189,34 @@ void BeliefMassFunction::computeProbabilitiesScaled(const BeliefMassFunction *a[
     _mm256_store_ps(results[0], free);
     _mm256_store_ps(results[1], occupied);
 }
+
+void BeliefMassFunction::considerAge(float update_time) {
+    float age = update_time - this->last_update;
+    float alpha = exp2(-age/AGE_FACTOR);
+    this->masses[0] *= alpha;
+    this->masses[1] *= alpha;
+    this->masses[2] *= alpha;
+    this->masses[3] = this->masses[3] * alpha + (1 - alpha);
+    this->last_update = update_time;
+}
+
+// Like the previous function but with AVX2 instructions
+void BeliefMassFunction::considerAges(float update_time, BeliefMassFunction *[8])
+{
+    __m256 occupancy = VECTORIZE_MASSES(a, State::OCCUPIED);
+    __m256 free = VECTORIZE_MASSES(a, State::FREE);
+    __m256 unknown = VECTORIZE_MASSES(a, State::UNKNOWN);
+    __m256 conflict = VECTORIZE_MASSES(a, State::CONFLICT);
+
+    __m256 age = _mm256_set1_ps(update_time);
+    __m256 last_update = _mm256_load_ps(a[0]->last_update);
+    age = _mm256_sub_ps(age, last_update);
+    __m256 alpha = _mm256_div_ps(age, _mm256_set1_ps(AGE_FACTOR));
+    alpha = _mm256_exp_ps(alpha);
+
+    free = _mm256_mul_ps(free, alpha);
+    occupancy = _mm256_mul_ps(occupancy, alpha);
+    conflict = _mm256_mul_ps(conflict, alpha);
+    unknown = _mm256_mul_ps(unknown, alpha);
+    unknown = _mm256_add_ps(unknown, _mm256_sub_ps(_mm256_set1_ps(1.0), alpha));
+}

@@ -1,5 +1,7 @@
 #include <string>
 
+#define AGE_FACTOR 0.2 
+
 class BeliefMassFunction
 {
 public:
@@ -51,6 +53,9 @@ public:
 
     static void computeProbabilitiesScaled(const BeliefMassFunction *[8], float [2][8], float);
 
+    void considerAge(float update_time);
+
+    static void considerAges(float update_time, BeliefMassFunction *[8]);
     // - - Operators
     BeliefMassFunction &operator+=(BeliefMassFunction const &other);
     BeliefMassFunction operator+(const BeliefMassFunction &other) const;
@@ -58,4 +63,5 @@ public:
 private:
     // - Attributes
     float masses[4];
+    float last_update;
 };
