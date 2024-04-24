@@ -63,5 +63,5 @@ public:
 private:
     // - Attributes
     float masses[4];
-    float last_update;
+    float last_update = 0.0;
 };
