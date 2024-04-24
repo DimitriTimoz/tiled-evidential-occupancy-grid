@@ -1,8 +1,0 @@
-prefix=/home/ros/project/tiled_evidential_occupancy_grid_maps/devel
-
-Name: evidential_grid
-Description: Description of evidential_grid
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
