@@ -1,4 +1,4 @@
-#include "common/EOGM.h"
+#include "EOGM.h"
 #include <cmath>
 #include <ros/ros.h>
 

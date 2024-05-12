@@ -1,4 +1,4 @@
-#include "common/BeliefMassFunction.h"
+#include "BeliefMassFunction.h"
 #include <immintrin.h>
 #include <ros/ros.h>
 

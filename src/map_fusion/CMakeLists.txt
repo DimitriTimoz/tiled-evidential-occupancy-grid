@@ -10,7 +10,6 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  common
   tf2
   tf2_geometry_msgs
   octomap_ros
@@ -143,6 +142,7 @@ add_executable(
   src/map_fusion_node.cpp
   src/MapFusion.cpp
   src/LaserScanToGrid.cpp
+  src/EvidentialGrid.cpp
 )
 
 ## Rename C++ executable without prefix

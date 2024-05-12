@@ -1,4 +1,4 @@
-#include "common/Point2D.h"
+#include "Point2D.h"
 
 bool Point2D::operator==(const Point2D &other) const
 {
