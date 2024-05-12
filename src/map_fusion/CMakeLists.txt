@@ -142,6 +142,7 @@ add_executable(
   ${PROJECT_NAME}_node 
   src/map_fusion_node.cpp
   src/MapFusion.cpp
+  src/LaserScanToGrid.cpp
 )
 
 ## Rename C++ executable without prefix

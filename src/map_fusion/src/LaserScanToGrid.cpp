@@ -1,4 +1,4 @@
-#include "LaserScanToGrid.h"
+#include "LaserScanToGrid.hpp"
 #include "common/EOGM.h"
 #include <cmath>
 #include <chrono>
