@@ -143,6 +143,10 @@ add_executable(
   src/MapFusion.cpp
   src/LaserScanToGrid.cpp
   src/EvidentialGrid.cpp
+  src/Acquisition.cpp
+  src/common/BeliefMassFunction.cpp
+  src/common/EOGM.cpp
+  src/common/Point2D.cpp
 )
 
 ## Rename C++ executable without prefix
@@ -218,4 +222,4 @@ target_link_libraries(${PROJECT_NAME}_node
 
 
 
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=haswell") # Enable AVX2
