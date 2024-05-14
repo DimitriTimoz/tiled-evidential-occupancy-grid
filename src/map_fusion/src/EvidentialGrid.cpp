@@ -7,8 +7,8 @@
 // - Std
 #include <chrono>
 
-EvidentialGrid::EvidentialGrid(ros::NodeHandle &node_handle, float resolution, const char *odometry_topic, const char *laser_scan_topic) : node_handle(node_handle),
-                                                                                                                                           global_eogm(20, 20, resolution),
+EvidentialGrid::EvidentialGrid(ros::NodeHandle &node_handle, unsigned int width, unsigned int height, float resolution, const char *odometry_topic, const char *laser_scan_topic) : node_handle(node_handle),
+                                                                                                                                           global_eogm(width, height, resolution),
                                                                                                                                            resolution(resolution),
                                                                                                                                            laser_scan_topic(laser_scan_topic),
                                                                                                                                            local_eogm(resolution)

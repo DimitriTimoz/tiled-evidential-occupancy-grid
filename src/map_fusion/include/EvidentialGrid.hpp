@@ -16,7 +16,7 @@ class EvidentialGrid
 {
 public:
   EvidentialGrid() = delete;
-  EvidentialGrid(ros::NodeHandle &, float, const char *, const char *);
+  EvidentialGrid(ros::NodeHandle &, unsigned int, unsigned int, float, const char *, const char *);
 
   void visionCallback(const sensor_msgs::LaserScanConstPtr &);
   void odometryCallback(const nav_msgs::OdometryConstPtr &);

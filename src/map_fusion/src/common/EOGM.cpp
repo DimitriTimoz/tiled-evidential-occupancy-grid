@@ -305,3 +305,13 @@ unsigned int EOGM::getHeight() const
 {
     return this->grid[0].size();
 }
+
+float EOGM::getRealWidth() const
+{
+    return this->grid.size() * this->resolution;
+}
+
+float EOGM::getRealHeight() const
+{
+    return this->grid[0].size() * this->resolution;
+}

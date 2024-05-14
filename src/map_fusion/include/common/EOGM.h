@@ -32,6 +32,8 @@ public:
 
     unsigned int getWidth() const;
     unsigned int getHeight() const;
+    float getRealWidth() const;
+    float getRealHeight() const;
 
     // - - Setters
     void setOrigin(double x, double y);
