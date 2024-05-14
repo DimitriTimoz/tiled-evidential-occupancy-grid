@@ -18,8 +18,6 @@ void EvidentialGrid::fuse()
 {
     static bool first_time = true;
 
-    ROS_INFO_STREAM("Fusing Local Grids");
-
     auto total_fuse = std::chrono::high_resolution_clock::now();
 
     // Set the origin of the global EOGM
