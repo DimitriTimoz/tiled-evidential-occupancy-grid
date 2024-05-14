@@ -13,9 +13,10 @@ class EOGM
 public:
     // - Methods
     // - - Constructors
-    EOGM() = default;
+    EOGM() = delete;
+    EOGM(float resolution);
     EOGM(unsigned int width, unsigned int height, float resolution);
-    EOGM(std::vector<std::vector<float>> occupied, std::vector<std::vector<float>> free, float resolution);
+    EOGM(std::vector<std::vector<float>> &occupied, std::vector<std::vector<float>> &free, float resolution);
     EOGM(nav_msgs::OccupancyGrid occupancy_grid, nav_msgs::OccupancyGrid free_grid, float resolution);
     // - - Destructor
     ~EOGM();
@@ -29,17 +30,21 @@ public:
     nav_msgs::OccupancyGrid getFreeGrid();
     octomap::ColorOcTree &getOctomap();
 
+    unsigned int getWidth() const;
+    unsigned int getHeight() const;
+
     // - - Setters
     void setOrigin(double x, double y);
 
     // - - Operations
 
+    void setCell(int x, int y, BeliefMassFunction value);
+    void resize(unsigned int width, unsigned int height);
+
     ///@brief Fuse this EOGM with another using Dempster-Shafer theory. This also update the associated octomap.
     ///
     ///@param other  The other EOGM to fuse with
     void fuse(const EOGM &other);
-    void updateOctomap(int x, int y, const BeliefMassFunction *);
-    void updateOctomap(octomap::point3d[], const BeliefMassFunction *[], size_t size);
 
     // - - Conversion
     inline static int8_t fromFloatToByte(float value)
@@ -59,6 +64,10 @@ public:
     EOGM &operator+=(const EOGM &other);
 
 private:
+    // - Methods
+    void updateOctomap(int x, int y, const BeliefMassFunction *);
+    void updateOctomap(octomap::point3d[], const BeliefMassFunction *[], size_t size);
+
     // - Attributes
     // - - Constants
     const octomap::ColorOcTreeNode::Color occupied_color = octomap::ColorOcTreeNode::Color(255, 0, 0);

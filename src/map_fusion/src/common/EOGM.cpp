@@ -2,7 +2,9 @@
 #include <cmath>
 #include <ros/ros.h>
 
-EOGM::EOGM(unsigned int width, unsigned int height, float resolution) : resolution(resolution), x(0), y(0)
+EOGM::EOGM(float resolution) : resolution(resolution), x(0), y(0) {}
+
+EOGM::EOGM(unsigned int width, unsigned int height, float resolution) : EOGM(resolution)
 {
     this->grid = std::vector<std::vector<BeliefMassFunction>>(width / resolution, std::vector<BeliefMassFunction>(height / resolution, BeliefMassFunction()));
     this->tree = new octomap::ColorOcTree(1);
@@ -13,9 +15,10 @@ EOGM::~EOGM()
     delete tree;
 }
 
-EOGM::EOGM(std::vector<std::vector<float>> occupied, std::vector<std::vector<float>> free, float resolution) : resolution(resolution)
+EOGM::EOGM(std::vector<std::vector<float>> &occupied, std::vector<std::vector<float>> &free, float resolution) : EOGM(occupied.size(), occupied[0].size(), resolution)
 {
-    this->grid = std::vector<std::vector<BeliefMassFunction>>(occupied.size(), std::vector<BeliefMassFunction>(occupied[0].size(), BeliefMassFunction()));
+    if (occupied.size() != free.size() || occupied[0].size() != free[0].size())
+        return;
 
     for (int x = 0; x < occupied.size(); x++)
     {
@@ -185,7 +188,7 @@ void EOGM::fuse(const EOGM &other)
             a[m] = &this->grid[k][l];
             b[m] = &other.grid[i][j];
 
-    //        ROS_INFO("Point : %d, %d", k, l);
+            //        ROS_INFO("Point : %d, %d", k, l);
 
             points[m] = octomap::point3d(k, l, 0);
             m++;
@@ -265,7 +268,6 @@ void EOGM::updateOctomap(int x, int y, const BeliefMassFunction *mass)
         for (int i = free; i < 10; i++)
             this->tree->updateNode(octomap::point3d(x, y, i), false, false);
     }
-
 }
 
 void EOGM::updateOctomap(octomap::point3d points[], const BeliefMassFunction *masses[], size_t size)
@@ -274,4 +276,32 @@ void EOGM::updateOctomap(octomap::point3d points[], const BeliefMassFunction *ma
     {
         this->updateOctomap(points[i].x(), points[i].y(), masses[i]);
     }
+}
+
+void EOGM::setCell(int x, int y, BeliefMassFunction value)
+{
+    this->grid[x][y] = value;
+}
+
+void EOGM::resize(unsigned int width, unsigned int height)
+{
+    width = width / this->resolution;
+    height = height / this->resolution;
+
+    this->grid.resize(width);
+    for (int x = 0; x < width; x++)
+    {
+        this->grid[x].resize(height);
+        this->grid[x].assign(height, BeliefMassFunction());
+    }
+}
+
+unsigned int EOGM::getWidth() const
+{
+    return this->grid.size();
+}
+
+unsigned int EOGM::getHeight() const
+{
+    return this->grid[0].size();
 }

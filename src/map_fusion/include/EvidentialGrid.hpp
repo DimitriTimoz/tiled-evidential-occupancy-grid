@@ -10,49 +10,51 @@
 // - - Std
 #include <mutex>
 #include <tuple>
+#include <string>
 
 class EvidentialGrid
 {
 public:
-    EvidentialGrid(ros::NodeHandle &, float resolution = 0.05);
+  EvidentialGrid() = delete;
+  EvidentialGrid(ros::NodeHandle &, float, const char *, const char *);
 
-    void visionCallback(const sensor_msgs::LaserScanConstPtr &);
-    void odometryCallback(const nav_msgs::OdometryConstPtr &);
+  void visionCallback(const sensor_msgs::LaserScanConstPtr &);
+  void odometryCallback(const nav_msgs::OdometryConstPtr &);
 
 private:
-    // - Methods
+  // - Methods
 
-    void main(const sensor_msgs::LaserScanConstPtr &);
+  void main(const sensor_msgs::LaserScanConstPtr &);
 
-    // - - Laser scan to grid
-    nav_msgs::OccupancyGrid getOccupancyGrid();
+  // - - Laser scan to grid
+  nav_msgs::OccupancyGrid getOccupancyGrid();
 
-    double getZRotation();
-    std::tuple<double, double> getXYTranslation();
-    
-    void laserScanToGrid(const sensor_msgs::LaserScanConstPtr &);
+  double getZRotation();
+  std::tuple<double, double> getXYTranslation();
 
-    // - - Map fusion
+  void laserScanToGrid(const sensor_msgs::LaserScanConstPtr &);
 
-    void fuse();
-    void publish();
+  // - - Map fusion
 
-      // - Attributes
+  void fuse();
+  void publish();
 
-    ros::Publisher global_eogm_publisher;
+  // - Attributes
 
-    ros::Subscriber ar_sub_;
-    ros::Subscriber odometry_subscriber;
+  ros::Publisher global_eogm_publisher;
 
-    std::vector<std::vector<float>> occupied, free;
+  ros::Subscriber ar_sub_;
+  ros::Subscriber odometry_subscriber;
+  
+  std::mutex current_odometry_mutex;
+  nav_msgs::Odometry current_odometry;
 
-    std::mutex current_odometry_mutex;
-    nav_msgs::Odometry current_odometry;
+  ros::NodeHandle &node_handle;
 
-    ros::NodeHandle &node_handle;
+  EOGM local_eogm, global_eogm;
+  double origin_x, origin_y;
 
-    EOGM global_eogm;
-    double origin_x, origin_y;
+  const float resolution;
 
-    const float resolution;
+  std::string laser_scan_topic;
 };

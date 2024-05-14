@@ -10,7 +10,11 @@ void EvidentialGrid::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
 
     // Wait for the first odometry message to arrive
     if (first_time)
-        this->ar_sub_ = this->node_handle.subscribe<sensor_msgs::LaserScan>("/robot/throttle/scan", 1, &EvidentialGrid::visionCallback, this);
+    {
+        ROS_INFO("Subscribing to laser scan topic : %s", this->laser_scan_topic.c_str());
+        this->ar_sub_ = this->node_handle.subscribe<sensor_msgs::LaserScan>(this->laser_scan_topic, 1, &EvidentialGrid::visionCallback, this);
+        first_time = false;
+    }
 }
 
 void EvidentialGrid::visionCallback(const sensor_msgs::LaserScanConstPtr &msg)

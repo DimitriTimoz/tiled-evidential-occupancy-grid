@@ -19,8 +19,7 @@ double EvidentialGrid::getZRotation()
 
 void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
 {
-  ROS_INFO("Laser scan : %d", msg->header.stamp);
-  ROS_INFO("Odom : %d", this->current_odometry.header.stamp);
+  ROS_INFO("Lag between laser scan and odometry : %f ms", (msg->header.stamp.toSec() - this->current_odometry.header.stamp.toSec()) * 1000);
 
   auto total_local = std::chrono::high_resolution_clock::now();
 
@@ -47,11 +46,8 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
 
   float start_angle = msg->angle_min + this->getZRotation();
 
-  this->free.clear();
-  this->occupied.clear();
+  this->local_eogm.resize(width, height);
 
-  this->free.resize(width, std::vector<float>(height, 0));
-  this->occupied.resize(width, std::vector<float>(height, 0));
 // Compute cartesian position of all the points
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < msg->ranges.size(); i++)
@@ -73,14 +69,14 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
     int x1 = x0 + (int)(range * cos(angle));
     int y1 = y0 + (int)(range * sin(angle));
 
-    if (x1 >= occupied.size() || y1 >= occupied[0].size())
+    if (x1 >= this->local_eogm.getWidth() || y1 >= this->local_eogm.getHeight() || x1 < 0 || y1 < 0)
     {
       ROS_ERROR("Error %d %d", x1, y1);
       continue;
     }
 
 #pragma omp critical
-    occupied[x1][y1] = 0.7;
+    this->local_eogm.setCell(x1, y1, BeliefMassFunction(BeliefMassFunction::State::OCCUPIED, 0.7));
 
     // Bresenham's algorithm
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -93,7 +89,7 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
       if (x0 != x1 || y0 != y1)
       {
 #pragma omp critical
-        free[x0][y0] = 0.7;
+        this->local_eogm.setCell(x0, y0, BeliefMassFunction(BeliefMassFunction::State::FREE, 0.7));
       }
       if (x0 == x1 && y0 == y1)
         break; // End of the line

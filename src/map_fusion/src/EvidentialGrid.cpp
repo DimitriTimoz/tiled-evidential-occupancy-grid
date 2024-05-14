@@ -7,22 +7,30 @@
 // - Std
 #include <chrono>
 
-EvidentialGrid::EvidentialGrid(ros::NodeHandle &node_handle, float resolution) : node_handle(node_handle),
-                                                                                 global_eogm(20, 20, resolution),
-                                                                                 resolution(resolution)
+EvidentialGrid::EvidentialGrid(ros::NodeHandle &node_handle, float resolution, const char *odometry_topic, const char *laser_scan_topic) : node_handle(node_handle),
+                                                                                                                                           global_eogm(20, 20, resolution),
+                                                                                                                                           resolution(resolution),
+                                                                                                                                           laser_scan_topic(laser_scan_topic),
+                                                                                                                                           local_eogm(resolution)
 
 {
 
-    this->odometry_subscriber = node_handle.subscribe("/robot/throttle/odom", 1, &EvidentialGrid::odometryCallback, this);
+    this->odometry_subscriber = node_handle.subscribe(odometry_topic, 1, &EvidentialGrid::odometryCallback, this);
 
     this->global_eogm_publisher = node_handle.advertise<octomap_msgs::Octomap>("global_eogm", 1);
 }
 
 void EvidentialGrid::main(const sensor_msgs::LaserScanConstPtr &msg)
 {
+    auto start = std::chrono::high_resolution_clock::now();
     this->laserScanToGrid(msg);
+    ROS_INFO("Laser scan to grid took %f ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
 
+    start = std::chrono::high_resolution_clock::now();
     this->fuse();
+    ROS_INFO("Fusion took %f ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
 
+    start = std::chrono::high_resolution_clock::now();
     this->publish();
+    ROS_INFO("Publishing took %f ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
 }
