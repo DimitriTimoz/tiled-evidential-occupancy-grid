@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     ros::NodeHandle node_handle;
 
     // EvidentialGrid evidential_grid(node_handle, 0.05, "/rmp440le/odom", "/jaguar_robot/scan");
-    EvidentialGrid evidential_grid(node_handle, 40, 40, 0.25, "/robot/throttle/odom", "/robot/throttle/scan");  // For the Robotnik Vogui
+    EvidentialGrid evidential_grid(node_handle, 40, 40, 0.05, "/robot/throttle/odom", "/robot/throttle/scan");  // For the Robotnik Vogui
 
     ROS_INFO("Hello, I am a map_fusion_node.");
 
