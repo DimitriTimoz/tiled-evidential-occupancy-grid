@@ -1,5 +1,7 @@
 #include <string>
 
+#define AGE_FACTOR 0.2 
+
 /// @brief The Belief Mass Function class
 class BeliefMassFunction
 {
@@ -76,9 +78,22 @@ public:
     /// @param scale The scale of the pignistic probability (usually 1).
     static void computeProbabilitiesScaled(const BeliefMassFunction *a[8], float results[2][8], float scale);
 
+    /// @brief Consider the age the last update of the mass function to attenuate the masses.
+    /// @param new last update_time 
+    void considerAge(float update_time);
+
+    /// @brief Consider the age the last update of the mass functions to attenuate the masses.
+    /// @param update_time The time of the last update.
+    /// @param a An array of 8 BeliefMassFunction.
+    static void considerAges(const float *update_time[8], BeliefMassFunction *a[8]);
+
+
 private:
     // - Attributes
 
     /// @brief The masses of the mass function
     float masses[4];
+
+    /// @brief The time of the last update
+    float last_update = 0.0;
 };
