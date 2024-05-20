@@ -12,7 +12,7 @@ void EvidentialGrid::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
     if (first_time)
     {
         ROS_INFO("Subscribing to laser scan topic : %s", this->laser_scan_topic.c_str());
-        this->ar_sub_ = this->node_handle.subscribe<sensor_msgs::LaserScan>(this->laser_scan_topic, 1, &EvidentialGrid::visionCallback, this);
+        this->laser_scan_subscriber = this->node_handle.subscribe<sensor_msgs::LaserScan>(this->laser_scan_topic, 1, &EvidentialGrid::visionCallback, this);
         first_time = false;
     }
 }

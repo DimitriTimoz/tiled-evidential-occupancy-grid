@@ -43,7 +43,9 @@ private:
 
   ros::Publisher global_eogm_publisher;
 
-  ros::Subscriber ar_sub_;
+  /// @brief The laser scan subscriber
+  ros::Subscriber laser_scan_subscriber;
+  /// @brief The odometry subscriber
   ros::Subscriber odometry_subscriber;
   
   std::mutex current_odometry_mutex;
