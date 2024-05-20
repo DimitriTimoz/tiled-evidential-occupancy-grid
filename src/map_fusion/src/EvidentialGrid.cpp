@@ -24,13 +24,13 @@ void EvidentialGrid::main(const sensor_msgs::LaserScanConstPtr &msg)
 {
     auto start = std::chrono::high_resolution_clock::now();
     this->laserScanToGrid(msg);
-    ROS_INFO("Laser scan to grid took %d ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
+    ROS_INFO("Laser scan to grid took %li ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
 
     start = std::chrono::high_resolution_clock::now();
     this->fuse();
-    ROS_INFO("Fusion took %d ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
+    ROS_INFO("Fusion took %li ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
 
     start = std::chrono::high_resolution_clock::now();
     this->publish();
-    ROS_INFO("Publishing took %d ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
+    ROS_INFO("Publishing took %li ms", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
 }
