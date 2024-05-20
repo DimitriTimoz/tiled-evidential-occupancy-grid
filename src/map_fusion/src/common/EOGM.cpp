@@ -70,22 +70,6 @@ EOGM::EOGM(nav_msgs::OccupancyGrid occupancy_grid, nav_msgs::OccupancyGrid free_
     }
 }
 
-std::map<Point2D, BeliefMassFunction> EOGM::getGrid(float rotation_matrix[2][2], float translation_vector[2])
-{
-    std::map<Point2D, BeliefMassFunction> grid_map;
-    Point2D translation((int)round(translation_vector[0]), (int)round(translation_vector[1]));
-
-    for (int x = 0; x < this->grid.size(); x++)
-    {
-        for (int y = 0; y < this->grid[0].size(); y++)
-        {
-            Point2D point(x, y);
-            point = point.rotate(rotation_matrix);
-            grid_map[point + translation] = this->grid[x][y];
-        }
-    }
-}
-
 nav_msgs::OccupancyGrid EOGM::getOccupancyGrid()
 {
     nav_msgs::OccupancyGrid grid_msg;

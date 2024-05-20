@@ -146,7 +146,6 @@ add_executable(
   src/Acquisition.cpp
   src/common/BeliefMassFunction.cpp
   src/common/EOGM.cpp
-  src/common/Point2D.cpp
 )
 
 ## Rename C++ executable without prefix
