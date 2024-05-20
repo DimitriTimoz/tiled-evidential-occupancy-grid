@@ -27,6 +27,7 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
   // Initialize the grid
   // Compute the width and height of the grid based on the data
   int range_max = 0;
+  float max_intensity = msg->intensities[0];
   for (int i = 0; i < msg->ranges.size(); i++)
   {
     if (msg->intensities[i] < 500 || msg->ranges[i] > MAX_RANGE)
@@ -38,6 +39,10 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
     {
       range_max = range;
     }
+    if (msg->intensities[i] > max_intensity)
+    {
+      max_intensity = msg->intensities[i];
+    }
   }
 
   int height = (range_max) * 2 + 1;
@@ -47,14 +52,6 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
   float start_angle = msg->angle_min + this->getZRotation();
 
   this->local_eogm.resize(width, height);
-  float max_intensity = msg->intensities[0];
-  for (int i = 1; i < msg->intensities.size(); i++)
-  {
-    if (msg->intensities[i] > max_intensity)
-    {
-      max_intensity = msg->intensities[i];
-    }
-  }
 
   float threshold_intensity = (max_intensity * 0.1f);
 // Compute cartesian position of all the points
