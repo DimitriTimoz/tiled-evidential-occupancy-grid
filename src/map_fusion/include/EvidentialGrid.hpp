@@ -26,7 +26,8 @@ public:
   /// @param resolution The resolution of the grid
   /// @param odometry_topic The topic to subscribe to for odometry
   /// @param laser_scan_topic The topic to subscribe to for laser scans
-  EvidentialGrid(ros::NodeHandle &node_handle, unsigned int width, unsigned int height, float resolution, const char *odometry_topic, const char *laser_scan_topic);
+  /// @param local_grid_realignment Whether to realign the local grid need to be realigned with the global grid using the odometry (default: true)
+  EvidentialGrid(ros::NodeHandle &node_handle, unsigned int width, unsigned int height, float resolution, const char *odometry_topic, const char *laser_scan_topic, bool local_grid_realignment = true);
 
   ///@brief Callback for the odometry topic
   ///
@@ -90,4 +91,7 @@ private:
 
   /// @brief Laser scan topic string
   std::string laser_scan_topic;
+
+  /// @brief Whether to realign the local grid need to be realigned with the global grid using the odometry
+  bool local_grid_realignment;
 };

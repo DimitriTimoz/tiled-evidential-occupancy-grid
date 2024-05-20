@@ -40,12 +40,15 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
     }
   }
 
-  int height = (range_max) * 2 + 1;
-  int width = (range_max) * 2 + 1;
+  int height = range_max * 2 + 1;
+  int width = range_max * 2 + 1;
   int origin = range_max;
 
-  float start_angle = msg->angle_min + this->getZRotation();
-
+  float start_angle = 0;
+  if (this->local_grid_realignment)
+  {
+    start_angle += this->getZRotation();
+  }
   this->local_eogm.resize(width, height);
 
   float threshold_intensity = (max_intensity * 0.1f);
@@ -58,7 +61,7 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
       continue;
     }
 
-    float angle = start_angle + i * msg->angle_increment;
+    float angle = start_angle + (i * msg->angle_increment);
     float range = msg->ranges[i] / this->resolution;
 
     if (range > range_max)
