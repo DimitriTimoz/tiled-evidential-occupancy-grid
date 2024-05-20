@@ -60,74 +60,71 @@ float BeliefMassFunction::getConjunctionLevel(const BeliefMassFunction &other, S
     }
 }
 
+/// @brief Load 8 masses from an array of 8 BeliefMassFunction
 #define VECTORIZE_MASSES(a, state) _mm256_set_ps(a[0]->getMass(state), a[1]->getMass(state), a[2]->getMass(state), a[3]->getMass(state), a[4]->getMass(state), a[5]->getMass(state), a[6]->getMass(state), a[7]->getMass(state))
 
 void BeliefMassFunction::computeConjunctionLevels(BeliefMassFunction *a[8], const BeliefMassFunction *b[8])
 {
-    // General operation :
-    // 1 : Free : (F_1 * F_2) + (F_1 * Omega_2) + (Omega_1 * F_2)
-    // 2 : Occupied : (O_1 * O_2) + (O_1 * Omega_2) + (Omega_1 * O_2)
-    // 3 : Conflict : (F_1 * O_2) + (O_1 * F_2)
-    // 4 : Unknown : Omega_1 * Omega_2
+    // - Compute conjunction level of free : (F_1 * F_2) + (F_1 * Omega_2) + (Omega_1 * F_2)
 
-    // - Free
+    __m256 a_vector = VECTORIZE_MASSES(a, State::FREE);     // Load all 8 free masses of a
+    __m256 b_vector = VECTORIZE_MASSES(b, State::FREE);     // Load all 8 free masses of b
+    __m256 free_result = _mm256_mul_ps(a_vector, b_vector); // F_1 * F_2
 
-    __m256 a_vector = VECTORIZE_MASSES(a, State::FREE);
-    __m256 b_vector = VECTORIZE_MASSES(b, State::FREE);
-    __m256 free_result = _mm256_mul_ps(a_vector, b_vector);
+    a_vector = VECTORIZE_MASSES(a, State::FREE);                    // Load all 8 free masses of a
+    b_vector = VECTORIZE_MASSES(b, State::UNKNOWN);                 // Load all 8 unknown masses of b
+    free_result = _mm256_fmadd_ps(a_vector, b_vector, free_result); // (F_1 * Omega_2) + (F_1 * F_2)
 
-    a_vector = VECTORIZE_MASSES(a, State::FREE);
-    b_vector = VECTORIZE_MASSES(b, State::UNKNOWN);
-    free_result = _mm256_fmadd_ps(a_vector, b_vector, free_result);
+    a_vector = VECTORIZE_MASSES(a, State::UNKNOWN);                 // Load all 8 unknown masses of a
+    b_vector = VECTORIZE_MASSES(b, State::FREE);                    // Load all 8 free masses of b
+    free_result = _mm256_fmadd_ps(a_vector, b_vector, free_result); // (Omega_1 * F_2) + (F_1 * Omega_2) + (F_1 * F_2)
 
-    a_vector = VECTORIZE_MASSES(a, State::UNKNOWN);
-    b_vector = VECTORIZE_MASSES(b, State::FREE);
-    
-    free_result = _mm256_fmadd_ps(a_vector, b_vector, free_result);
+    // - Compute conjunction level of occupied : (O_1 * O_2) + (O_1 * Omega_2) + (Omega_1 * O_2)
 
-    // - Occupied
+    a_vector = VECTORIZE_MASSES(a, State::OCCUPIED);            // Load all 8 occupied masses of a
+    b_vector = VECTORIZE_MASSES(b, State::OCCUPIED);            // Load all 8 occupied masses of b
+    __m256 occupied_result = _mm256_mul_ps(a_vector, b_vector); // O_1 * O_2
 
-    a_vector = VECTORIZE_MASSES(a, State::OCCUPIED);
-    b_vector = VECTORIZE_MASSES(b, State::OCCUPIED);
-    __m256 occupied_result = _mm256_mul_ps(a_vector, b_vector);
+    a_vector = VECTORIZE_MASSES(a, State::OCCUPIED);                        // Load all 8 occupied masses of a
+    b_vector = VECTORIZE_MASSES(b, State::UNKNOWN);                         // Load all 8 unknown masses of b
+    occupied_result = _mm256_fmadd_ps(a_vector, b_vector, occupied_result); // (O_1 * Omega_2) + (O_1 * O_2)
 
-    a_vector = VECTORIZE_MASSES(a, State::OCCUPIED);
-    b_vector = VECTORIZE_MASSES(b, State::UNKNOWN);
-    occupied_result = _mm256_fmadd_ps(a_vector, b_vector, occupied_result);
+    a_vector = VECTORIZE_MASSES(a, State::UNKNOWN);                         // Load all 8 unknown masses of a
+    b_vector = VECTORIZE_MASSES(b, State::OCCUPIED);                        // Load all 8 occupied masses of b
+    occupied_result = _mm256_fmadd_ps(a_vector, b_vector, occupied_result); // (Omega_1 * O_2) + (O_1 * Omega_2) + (O_1 * O_2)
 
-    a_vector = VECTORIZE_MASSES(a, State::UNKNOWN);
-    b_vector = VECTORIZE_MASSES(b, State::OCCUPIED);
-    occupied_result = _mm256_fmadd_ps(a_vector, b_vector, occupied_result);
+    // - Compute conjunction level of conflict : (F_1 * O_2) + (O_1 * F_2)
 
-    // - Conflict
+    a_vector = VECTORIZE_MASSES(a, State::FREE);                // Load all 8 free masses of a
+    b_vector = VECTORIZE_MASSES(b, State::OCCUPIED);            // Load all 8 occupied masses of b
+    __m256 conflict_result = _mm256_mul_ps(a_vector, b_vector); // F_1 * O_2
 
-    a_vector = VECTORIZE_MASSES(a, State::FREE);
-    b_vector = VECTORIZE_MASSES(b, State::OCCUPIED);
-    __m256 conflict_result = _mm256_mul_ps(a_vector, b_vector);
-
-    a_vector = VECTORIZE_MASSES(a, State::OCCUPIED);
-    b_vector = VECTORIZE_MASSES(b, State::FREE);
-    conflict_result = _mm256_fmadd_ps(a_vector, b_vector, conflict_result);
+    a_vector = VECTORIZE_MASSES(a, State::OCCUPIED);                        // Load all 8 occupied masses of a
+    b_vector = VECTORIZE_MASSES(b, State::FREE);                            // Load all 8 free masses of b
+    conflict_result = _mm256_fmadd_ps(a_vector, b_vector, conflict_result); // (O_1 * F_2) + (F_1 * O_2)
 
     // - Unknown
 
-    a_vector = VECTORIZE_MASSES(a, State::UNKNOWN);
-    b_vector = VECTORIZE_MASSES(b, State::UNKNOWN);
-    __m256 unknown_result = _mm256_mul_ps(a_vector, b_vector);
-
-    // - Sum everything up for normalization
-
-    __m256 sum = _mm256_add_ps(free_result, occupied_result);
-    sum = _mm256_add_ps(sum, conflict_result);
-    sum = _mm256_add_ps(sum, unknown_result);
+    a_vector = VECTORIZE_MASSES(a, State::UNKNOWN);            // Load all 8 unknown masses of a
+    b_vector = VECTORIZE_MASSES(b, State::UNKNOWN);            // Load all 8 unknown masses of b
+    __m256 unknown_result = _mm256_mul_ps(a_vector, b_vector); // Omega_1 * Omega_2
 
     // - Normalize
 
-    free_result = _mm256_div_ps(free_result, sum);
-    occupied_result = _mm256_div_ps(occupied_result, sum);
-    conflict_result = _mm256_div_ps(conflict_result, sum);
-    unknown_result = _mm256_div_ps(unknown_result, sum);
+    // - - Sum everything up for normalization
 
+    __m256 sum = _mm256_add_ps(free_result, occupied_result); // Sum of free and occupied
+    sum = _mm256_add_ps(sum, conflict_result);                // Sum of free, occupied and conflict
+    sum = _mm256_add_ps(sum, unknown_result);                 // Sum of free, occupied, conflict and unknown
+
+    // - - Apply normalization
+
+    free_result = _mm256_div_ps(free_result, sum);         // free_result = free_result / sum
+    occupied_result = _mm256_div_ps(occupied_result, sum); // occupied_result = occupied_result / sum
+    conflict_result = _mm256_div_ps(conflict_result, sum); // conflict_result = conflict_result / sum
+    unknown_result = _mm256_div_ps(unknown_result, sum);   // unknown_result = unknown_result / sum
+
+    // - Store results
 
     alignas(32) float results[4][8];
     _mm256_store_ps(results[0], free_result);
@@ -135,6 +132,7 @@ void BeliefMassFunction::computeConjunctionLevels(BeliefMassFunction *a[8], cons
     _mm256_store_ps(results[2], conflict_result);
     _mm256_store_ps(results[3], unknown_result);
 
+    // - Set the masses
     for (int i = 0; i < 8; i++)
     {
         int j = 7 - i;
@@ -143,20 +141,6 @@ void BeliefMassFunction::computeConjunctionLevels(BeliefMassFunction *a[8], cons
         a[j]->setMass(State::CONFLICT, results[2][i]);
         a[j]->setMass(State::UNKNOWN, results[3][i]);
     }
-
-}
-
-BeliefMassFunction BeliefMassFunction::operator+(const BeliefMassFunction &other) const
-{
-    BeliefMassFunction result;
-
-    // - Conjunctive combination
-    result.setMass(State::FREE, this->getConjunctionLevel(other, State::FREE));
-    result.setMass(State::OCCUPIED, this->getConjunctionLevel(other, State::OCCUPIED));
-    result.setMass(State::UNKNOWN, this->getConjunctionLevel(other, State::UNKNOWN));
-    result.setMass(State::CONFLICT, this->getConjunctionLevel(other, State::CONFLICT));
-
-    return result;
 }
 
 float BeliefMassFunction::getOccupancyProbability() const
@@ -169,23 +153,18 @@ float BeliefMassFunction::getFreeProbability() const
     return this->getMass(State::FREE) / (1 - this->getMass(State::CONFLICT));
 }
 
-BeliefMassFunction &BeliefMassFunction::operator+=(BeliefMassFunction const &other)
-{
-    return *this = *this + other;
-}
-
 void BeliefMassFunction::computeProbabilitiesScaled(const BeliefMassFunction *a[8], float results[2][8], float scale)
 {
-    __m256 conflict = VECTORIZE_MASSES(a, State::CONFLICT);
-    __m256 s = _mm256_set1_ps(scale);
-    conflict = _mm256_fnmadd_ps(conflict, s, s);
-    
-    __m256 free = VECTORIZE_MASSES(a, State::FREE);
-    __m256 occupied = VECTORIZE_MASSES(a, State::OCCUPIED);
+    __m256 conflict = VECTORIZE_MASSES(a, State::CONFLICT); // Load all 8 conflict masses
+    __m256 s = _mm256_set1_ps(scale);                       // Set all 8 floats to the same value (scale)
+    conflict = _mm256_fnmadd_ps(conflict, s, s);            // conflict = scale - conflict * scale
 
-    free = _mm256_div_ps(free, conflict);
-    occupied = _mm256_div_ps(occupied, conflict);
+    __m256 free = VECTORIZE_MASSES(a, State::FREE);         // Load all 8 free masses
+    __m256 occupied = VECTORIZE_MASSES(a, State::OCCUPIED); // Load all 8 occupied masses
 
-    _mm256_store_ps(results[0], free);
-    _mm256_store_ps(results[1], occupied);
+    free = _mm256_div_ps(free, conflict);         // free = free / conflict
+    occupied = _mm256_div_ps(occupied, conflict); // occupied = occupied / conflict
+
+    _mm256_store_ps(results[0], free);     // Store the 8 free probabilities in the results array
+    _mm256_store_ps(results[1], occupied); // Store the 8 occupied probabilities in the results array
 }
