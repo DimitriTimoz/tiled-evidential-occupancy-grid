@@ -183,7 +183,7 @@ void BeliefMassFunction::considerAge(float update_time) {
 __m256 exp256_ps(__m256 x);
 
 // Like the previous function but with AVX2 instructions
-void BeliefMassFunction::considerAges(const float *update_time[8], BeliefMassFunction *a[8])
+void BeliefMassFunction::considerAges(float update_time, BeliefMassFunction *a[8])
 {
     __m256 occupancy = VECTORIZE_MASSES(a, State::OCCUPIED);
     __m256 free = VECTORIZE_MASSES(a, State::FREE);
@@ -191,7 +191,7 @@ void BeliefMassFunction::considerAges(const float *update_time[8], BeliefMassFun
     __m256 conflict = VECTORIZE_MASSES(a, State::CONFLICT);
 
     // Correctly load from an array of pointers to floats
-    __m256 age = _mm256_load_ps(update_time[0]);
+    __m256 age = _mm256_set1_ps(update_time);
     __m256 last_update = _mm256_set1_ps(a[0]->last_update);
     age = _mm256_sub_ps(age, last_update);
 

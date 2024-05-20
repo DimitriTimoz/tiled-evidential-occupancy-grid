@@ -85,7 +85,7 @@ public:
     /// @brief Consider the age the last update of the mass functions to attenuate the masses.
     /// @param update_time The time of the last update.
     /// @param a An array of 8 BeliefMassFunction.
-    static void considerAges(const float *update_time[8], BeliefMassFunction *a[8]);
+    static void considerAges(float update_time, BeliefMassFunction *a[8]);
 
 
 private:

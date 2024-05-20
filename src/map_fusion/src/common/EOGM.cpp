@@ -141,7 +141,7 @@ void EOGM::fuse(const EOGM &other)
     int y_offset = (other.y - this->y) / this->resolution;
 
     BeliefMassFunction placeholders[8];
-
+    float new_last_update = ros::Time::now().toSec();
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < other.grid.size(); i++)
     {
@@ -180,6 +180,7 @@ void EOGM::fuse(const EOGM &other)
             // Compute the conjunctions in batches of 8
             if (m >= 8)
             {
+                BeliefMassFunction::considerAges(new_last_update, a);
                 BeliefMassFunction::computeConjunctionLevels(a, b);
 
 #pragma omp critical
@@ -200,7 +201,7 @@ void EOGM::fuse(const EOGM &other)
                 a[n] = &placeholders[n];
                 b[n] = &placeholders[n];
             }
-
+            BeliefMassFunction::considerAges(new_last_update, a);
             BeliefMassFunction::computeConjunctionLevels(a, b);
 
 #pragma omp critical
