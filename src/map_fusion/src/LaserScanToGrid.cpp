@@ -23,17 +23,12 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
 
   auto total_local = std::chrono::high_resolution_clock::now();
 
-#define MAX_RANGE 10
   // Initialize the grid
   // Compute the width and height of the grid based on the data
   int range_max = 0;
   float max_intensity = msg->intensities[0];
   for (int i = 0; i < msg->ranges.size(); i++)
   {
-    if (msg->intensities[i] < 500 || msg->ranges[i] > MAX_RANGE)
-    {
-      continue;
-    }
     int range = (int)msg->ranges[i] / this->resolution;
     if (range > range_max)
     {
@@ -58,7 +53,7 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < msg->ranges.size(); i++)
   {
-    if (msg->intensities[i] < threshold_intensity || msg->ranges[i] > MAX_RANGE)
+    if (msg->intensities[i] < threshold_intensity)
     {
       continue;
     }
