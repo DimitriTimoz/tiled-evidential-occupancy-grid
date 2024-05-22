@@ -44,14 +44,14 @@ void EvidentialGrid::laserScanToGrid(const sensor_msgs::LaserScanConstPtr &msg)
   int width = range_max * 2 + 1;
   int origin = range_max;
 
-  float start_angle = 0;
+  float start_angle = msg->angle_min;
   if (this->local_grid_realignment)
   {
     start_angle += this->getZRotation();
   }
   this->local_eogm.resize(width, height);
 
-  float threshold_intensity = (max_intensity * 0.1f);
+  float threshold_intensity = (max_intensity * 0.05f);
 // Compute cartesian position of all the points
 #pragma omp parallel for schedule(dynamic)
   for (int i = 0; i < msg->ranges.size(); i++)
