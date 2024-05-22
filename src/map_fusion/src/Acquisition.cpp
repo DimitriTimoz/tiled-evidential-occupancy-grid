@@ -7,7 +7,7 @@ void EvidentialGrid::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
     this->current_odometry_mutex.lock();
     current_odometry = *msg;
     this->current_odometry_mutex.unlock();
-
+    ROS_INFO("Odometry received, x: %f, y: %f", current_odometry.pose.pose.position.x, current_odometry.pose.pose.position.y);
     // Wait for the first odometry message to arrive
     if (first_time)
     {
