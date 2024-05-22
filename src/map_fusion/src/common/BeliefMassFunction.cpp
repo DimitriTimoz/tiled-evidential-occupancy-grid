@@ -168,3 +168,64 @@ void BeliefMassFunction::computeProbabilitiesScaled(const BeliefMassFunction *a[
     _mm256_store_ps(results[0], free);     // Store the 8 free probabilities in the results array
     _mm256_store_ps(results[1], occupied); // Store the 8 occupied probabilities in the results array
 }
+
+void BeliefMassFunction::considerAge(float update_time) {
+    float age = update_time - this->last_update;
+    float alpha = exp2(-age/AGE_FACTOR);
+    this->masses[0] *= alpha;
+    this->masses[1] *= alpha;
+    this->masses[2] *= alpha;
+    this->masses[3] = this->masses[3] * alpha + (1 - alpha);
+    this->last_update = update_time;
+}
+
+// Placeholder for exponential calculation
+__m256 exp256_ps(__m256 x);
+
+// Like the previous function but with AVX2 instructions
+void BeliefMassFunction::considerAges(float update_time, BeliefMassFunction *a[8])
+{
+    __m256 occupancy = VECTORIZE_MASSES(a, State::OCCUPIED);
+    __m256 free = VECTORIZE_MASSES(a, State::FREE);
+    __m256 unknown = VECTORIZE_MASSES(a, State::UNKNOWN);
+    __m256 conflict = VECTORIZE_MASSES(a, State::CONFLICT);
+
+    // Correctly load from an array of pointers to floats
+    __m256 age = _mm256_set1_ps(update_time);
+    __m256 last_update = _mm256_set1_ps(a[0]->last_update);
+    age = _mm256_sub_ps(age, last_update);
+
+    __m256 alpha = _mm256_div_ps(age, _mm256_set1_ps(AGE_FACTOR));
+
+    // Applying an exponential function
+    alpha = exp256_ps(alpha);  // Replace this with your implementation of exp for AVX2
+
+    // Apply the aging factor to all belief states
+    free = _mm256_mul_ps(free, alpha);
+    occupancy = _mm256_mul_ps(occupancy, alpha);
+    conflict = _mm256_mul_ps(conflict, alpha);
+    unknown = _mm256_mul_ps(unknown, alpha);
+    unknown = _mm256_add_ps(unknown, _mm256_sub_ps(_mm256_set1_ps(1.0), alpha));
+}
+
+__m256 exp256_ps(__m256 x) {
+    x = _mm256_min_ps(x, _mm256_set1_ps(88.0f));
+    x = _mm256_max_ps(x, _mm256_set1_ps(-88.0f));
+
+    // coefficients for a Taylor Series approximation of exp(x) around 0
+    __m256 c1 = _mm256_set1_ps(1.0f);
+    __m256 c2 = _mm256_set1_ps(1.0f / 2.0f);
+    __m256 c3 = _mm256_set1_ps(1.0f / 6.0f);
+    __m256 c4 = _mm256_set1_ps(1.0f / 24.0f);
+
+    __m256 x2 = _mm256_mul_ps(x, x);
+    __m256 x3 = _mm256_mul_ps(x2, x);
+    __m256 x4 = _mm256_mul_ps(x3, x);
+
+    __m256 res = _mm256_add_ps(c1, x);
+    res = _mm256_add_ps(res, _mm256_mul_ps(c2, x2));
+    res = _mm256_add_ps(res, _mm256_mul_ps(c3, x3));
+    res = _mm256_add_ps(res, _mm256_mul_ps(c4, x4));
+
+    return res;
+}
