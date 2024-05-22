@@ -23,14 +23,16 @@ void EvidentialGrid::fuse()
     // Set the origin of the global EOGM
     if (first_time)
     {
-        auto origin_x = this->current_odometry.pose.pose.position.x - static_cast<float>(this->global_eogm.getRealWidth()) / 2;
-        auto origin_y = this->current_odometry.pose.pose.position.y - static_cast<float>(this->global_eogm.getRealHeight()) / 2;
+        auto origin_x = this->current_odometry.pose.pose.position.x - (this->global_eogm.getRealWidth() / 2);
+        auto origin_y = this->current_odometry.pose.pose.position.y - (this->global_eogm.getRealHeight() / 2);
         
         
         ROS_INFO("Setting origin to (%f, %f)", origin_x, origin_y);
         this->global_eogm.setOrigin(origin_x, origin_y);
         first_time = false;
     }
+
+    this->local_eogm.setOrigin(this->current_odometry.pose.pose.position.x, this->current_odometry.pose.pose.position.y);
 
     this->global_eogm.fuse(this->local_eogm);
 }

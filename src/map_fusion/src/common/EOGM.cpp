@@ -141,9 +141,13 @@ void EOGM::fuse(const EOGM &other)
     int y_offset = (other.y - this->y) / this->resolution;
 
     BeliefMassFunction placeholders[8];
+
     float new_last_update = ros::Time::now().toSec();
+
+    unsigned int outside_rows = 0, outside_columns = 0;
+
 #pragma omp parallel for schedule(dynamic)
-    for (size_t i = 0; i < other.grid.size(); i++)
+    for (size_t i = 0; i < other.getWidth(); i++)
     {
         // - Accumulate the conjunctions in batches of 8
         BeliefMassFunction *a[8];
@@ -154,10 +158,13 @@ void EOGM::fuse(const EOGM &other)
         int k = i + x_offset;
 
         // Ignore points outside the grid
-        if (k < 0 || k >= this->grid.size())
+        if (k < 0 || k >= this->getWidth())
+        {
+            outside_rows++;
             continue;
+        }
 
-        for (size_t j = 0; j < other.grid[0].size(); j++)
+        for (size_t j = 0; j < other.getHeight(); j++)
         {
             int l = j + y_offset;
 
@@ -166,13 +173,14 @@ void EOGM::fuse(const EOGM &other)
                 continue;
 
             // Ignore points outside the grid
-            if (l < 0 || l >= this->grid[0].size())
+            if (l < 0 || l >= this->getHeight())
+            {
+                outside_columns++;
                 continue;
+            }
 
             a[m] = &this->grid[k][l];
             b[m] = &other.grid[i][j];
-
-            //        ROS_INFO("Point : %d, %d", k, l);
 
             points[m] = octomap::point3d(k, l, 0);
             m++;
@@ -213,6 +221,11 @@ void EOGM::fuse(const EOGM &other)
     }
 
     this->tree->prune();
+
+    if (outside_rows > 0 || outside_columns > 0)
+    {
+        ROS_WARN("Ignored %d rows and %d columns. Consider resizing the grid.", outside_rows, outside_columns);
+    }
 }
 
 octomap::ColorOcTree &EOGM::getOctomap()
@@ -270,9 +283,6 @@ void EOGM::setCell(int x, int y, BeliefMassFunction value)
 
 void EOGM::resize(unsigned int width, unsigned int height)
 {
-    width = width / this->resolution;
-    height = height / this->resolution;
-
     this->grid.resize(width);
     for (int x = 0; x < width; x++)
     {
