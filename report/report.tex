@@ -1,0 +1,35 @@
+\documentclass[a4paper, 12pt]{report}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{lipsum}
+
+% Mise en page
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{15pt}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+\lhead{\leftmark}
+\rhead{\thepage}
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\graphicspath{ {./images/} }
+
+\begin{document}
+
+% Page de garde
+\include{cover}
+
+% Table des matières
+\tableofcontents
+
+\newcommand{\todo}{\begin{center}\Huge A faire\normalsize \end{center}} % A supprimer lorsque le rapport sera terminé
+
+
+\end{document}

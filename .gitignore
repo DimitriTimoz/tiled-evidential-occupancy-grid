@@ -4,3 +4,11 @@ install/
 outfile
 doc/
 .vscode/
+*.aux
+*.log
+*.out
+*.pdf
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
