@@ -1,0 +1,37 @@
+
+\section{Age consideration}
+
+In the context of updating belief functions to account for the temporal aspect, an age consideration is introduced. This accounts for the change in information over time, allowing for the adjustment of belief functions based on the age of the data.
+
+The adjustment factor, denoted as $ \alpha $, is determined by the difference in time between the old and new observations, normalized by a time constant $ \tau $. This factor reflects the degree of confidence attributed to the new observation relative to the old one.
+
+$$
+    \alpha = e^{\frac{t_{old}-t_{new}}{\tau}}
+$$
+
+Where:
+\begin{itemize}
+    \item $ t_{old} $ represents the timestamp of the old observation.
+    \item $ t_{new} $ represents the timestamp of the new observation.
+    \item $ \tau $ is a time constant determining the rate of decay of belief in older observations.
+\end{itemize}
+
+Upon incorporating the age consideration, the updated belief functions for focal elements (e.g., propositions) $F$ (support), $O$ (opposition), and $\Omega$ (the entire frame of discernment) at time $ t_{\text{new}} $ are calculated as follows:
+
+$$
+    \begin{cases}
+        m_{G\{i,j\},t_{new}}^{\alpha}(F) = (\alpha \times m_{G\{i,j\},t_{old}}(F)) \\
+        m_{G\{i,j\},t_{new}}^{\alpha}(O) = (\alpha \times m_{G\{i,j\},t_{old}}(O)) \\
+        m_{G\{i, j\}, t_{new}}^{\alpha}(\Omega) = 1 - \alpha + \alpha \times m_{G\{i, j\}, t_{old}}(\Omega)
+    \end{cases}
+$$
+
+
+Where:
+\begin{itemize}
+    \item $m_{G\{i,j\},t}$ denotes the belief function associated with the focal element $ G\{i,j\} $ at time $ t $.
+    \item The superscript $\alpha$ indicates the updated belief function after considering the age factor.
+\end{itemize}
+
+
+This adjustment allows for the integration of temporal dynamics into the Dempster Combination of Evidential Theory, enabling the refinement of belief functions based on the recency and relevance of information.

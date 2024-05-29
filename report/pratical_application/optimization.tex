@@ -1,0 +1,49 @@
+
+\section{Optimization}
+
+\subsection{Introduction}
+
+Since our algorithm is computationally intensive and is intended to be used in real-time applications, it is essential to optimize its performance.
+In this section, we discuss the optimization techniques employed to enhance the efficiency of our implementation.
+
+\subsection{Parallelization}
+
+One of the most effective ways to improve the performance of our algorithm is to parallelize the computation.
+Since OpenMP is integrated with ROS, we can utilize its parallel programming capabilities to distribute the computation across multiple CPU cores.
+However, we need to be careful when parallelizing the computation since concurrent access to shared data structures can lead to memory consistency issues.
+To avoid such problems, OpenMP provides the \todo macro to specify critical sections that should be executed atomically by a single thread.
+On the Robotnik Summit-XL HL, the processor is a 9th generation Intel processor (Coffee Lake Refresh) with 6 cores and 12 threads, this should allow from a 6x to 12x performance improvement for operations that can be parallelized.
+We applied parallelization to the computation of the following parts of our algorithm:
+\begin{itemize}
+    \item Laser scan to grid conversion
+    \item Belief mass function fusion
+    \item Pignistic probability computation
+    \item Age consideration computation
+\end{itemize}
+
+\subsection{Vectorization}
+
+In a similar fashion to parallelization, vectorization is another optimization technique that can significantly enhance the performance of our algorithm.
+This can be achieved by utilizing SIMD (Single Instruction, Multiple Data) instructions provided by modern processors to perform operations on multiple data elements simultaneously.
+On the Robotnik Summit-XL HL, the processor is a 9th generation Intel processor (Coffee Lake Refresh) with AVX2 support, allowing for efficient vectorization of operations.
+This allowed perform 8 32 bit floating point operations in parallel using AVX2 instructions.
+This should allow a performance improvement of up to 8x for operations that can be vectorized.
+In our case, we used vectorization to optimize the following parts of our algorithm:
+\begin{itemize}
+    \item Laser scan to grid conversion
+    \item Belief mass function fusion
+    \item Pignistic probability computation
+    \item Age consideration computation
+\end{itemize}
+
+\subsection{Memory optimization}
+
+Memory optimization is another crucial aspect of performance optimization.
+By reducing the memory footprint of our algorithm, we can reduce the number of dynamic memory allocations and deallocations (reallocations), which can be a significant bottleneck in performance.
+Here are some memory optimization techniques we used in our implementation:
+\begin{itemize}
+    \item Fixed-size arrays: Using fixed-size arrays instead of dynamic arrays can reduce the overhead of dynamic memory management and improve cache locality.
+          For example, we can use the \todo and \todo functions to resize the vector without reallocation.
+    \item Stack memory: Using stack memory instead of heap memory for temporary variables can reduce the overhead of dynamic memory management.
+    \item Reference passing: Passing variables, especially large data structures,by reference instead of by value can reduce the overhead of copying large data structures.
+\end{itemize}

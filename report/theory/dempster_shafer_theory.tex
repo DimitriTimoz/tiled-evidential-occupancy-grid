@@ -1,0 +1,40 @@
+\section{Dempster shafer theory}
+
+The Dempster Combination of Evidential Theory is a data fusion technique used within the framework of evidence theory, also known as Dempster-Shafer theory.
+This theory was developed by Glenn Shafer and Arthur P. Dempster in the 1960s and 1970s.
+Evidence theory is an approach to managing uncertainty and fusing information sources that may contain uncertainties or contradictions. It differs from classical probability theory in that it allows for more flexible treatment of uncertainty, including modeling ignorance or incomplete knowledge.
+
+The Dempster Combination is a fusion operation that combines belief functions (or mass functions) from different information sources to produce a global belief function.
+This operation is based on Dempster's combination rules, which take into account the degrees of concordance and discordance among different information sources:
+
+$$
+    \forall A \subseteq \Omega, m_{1\cap2}(A) = \sum_{B\cap A = A | C, C \subseteq \Omega} m_{1}(B) \times m_{2}(C)
+$$
+
+$$
+    m_{1\oplus2}(A) = \frac{m_{1\cap2}(A)}{1-m_{1\cap2}(\emptyset)}, \forall A\subseteq \Omega, A \neq \emptyset
+$$
+
+$$
+    m_{1 \oplus 2}(\emptyset) = 0
+$$
+
+In our case of an evidential grid, the frame of discernment is $\Omega = \{F, O, \Omega, \emptyset\}$, which translates to the following combination rules:
+
+$$
+    \begin{cases}
+        m_{1\cap2}(F) = \frac{m_{1}(\Omega) \times m_{2}(F) + m_{1}(F) \times m_{2}(\Omega) + m_{1}(F) \times m_{2}(F)}{1 - K} \\
+        m_{1\cap2}(O) = \frac{m_{1}(\Omega) \times m_{2}(O) + m_{1}(O) \times m_{2}(\Omega) + m_{1}(O) \times m_{2}(O)}{1 - K} \\
+        m_{1\cap2}(\Omega) = \frac{m_{1}(\Omega) \times m_{2}(\Omega)}{1 - K}                                                  \\
+        m_{1\cap2}(\emptyset) = 0
+    \end{cases}
+$$
+
+With the level of conflict measured by:
+
+$$
+    K = m_{1}(F) \times m_{2}(O) + m_{1}(O) \times m_{2}(F)
+$$
+
+In summary, the Dempster Combination of Evidential Theory is a method for merging different uncertain information sources within the evidence theory framework, using Dempster's combination rules to produce a more robust overall estimate.
+It is utilized in domains such as sensor fusion, decision-making under uncertainty, and other applications where managing uncertainty is crucial.

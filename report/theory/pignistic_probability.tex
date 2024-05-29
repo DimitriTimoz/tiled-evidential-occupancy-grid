@@ -1,0 +1,28 @@
+\section{Pignistic probability}
+
+In the Dempster-Shafer theory, pignistic probabilities offer a way to derive a single probability distribution from the belief mass function.
+This transformation from belief masses to probabilities facilitates decision-making and inference in a manner akin to classical probability theory.
+
+\subsection{Definition}
+
+Pignistic probability, denoted as $ Bel $, assigns a probability value to each individual element of the frame of discernment $ \Omega $. It represents the degree of belief that a specific proposition within $ \Omega $ is true.
+
+$$ Bel: \Omega \rightarrow [0,1] $$
+
+Where $ Bel(A) $ denotes the pignistic probability assigned to proposition $ A \in \Omega $.
+
+\subsection{Computation}
+
+Pignistic probability is computed using the belief mass function $ m $ and the concept of the focal elements, which are the non-empty subsets of $ \Omega $. For a focal element $ A $, the pignistic probability is calculated as the sum of belief masses of all subsets containing $ A $, normalized by the total belief mass assigned to all focal elements:
+
+$$ Bel(A) = \sum_{B \in F(A)} \frac{m(B)}{1 - m(\emptyset)} $$
+
+Where:
+\begin{itemize}
+    \item $ F(A) $ represents the set of all focal elements containing proposition $ A $.
+    \item $ m(\emptyset) $ is the belief mass assigned to the empty set, representing the total ignorance.
+\end{itemize}
+
+\subsection{ Interpretation }
+
+Pignistic probabilities offer a probabilistic interpretation of belief masses, providing a means to quantify uncertainty and make decisions based on the available evidence. Unlike belief masses, which assign support to subsets of $ \Omega $, pignistic probabilities assign probabilities directly to individual propositions within $ \Omega $.

@@ -12,3 +12,7 @@ doc/
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+*.run.xml
+*.bbl
+*.blg
+*.bcf
