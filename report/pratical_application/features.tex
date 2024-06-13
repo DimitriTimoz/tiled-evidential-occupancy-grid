@@ -34,3 +34,11 @@ Then, we fuse the local EOGM with the global EOGM using the Dempster's rule of c
 For each cell, we compute the age consideration by computing the difference between the current timestamp and the last update timestamp.
 Each mass is discounted by a factor of $\alpha = e^{\frac{t_{old}-t_{new}}{\tau}} $ and the mass of the unknown state is set to $m_{G\{i, j\}, t_{new}}(\Omega) = 1 - \alpha + \alpha \times m_{G\{i, j\}, t_{old}}(\Omega)$
 To compute the age consideration, we obviously use vectorization.
+
+\subsection{Octomap message}
+
+To visualize the map in RViz and transfer the map to other nodes, we publish the map as an \texttt{Octomap} message.
+The \texttt{Octomap} message is the best way to represent our EOGM with common ROS messages. 
+The \texttt{Octomap} message contains of each $x, y$ cell the Pignistic probability of the maximum probability state with a resolution of 10 blocks for 0 to 1.
+The blue color represents the unknown state, the green color represents the free state and the red color represents the occupied state.
+
