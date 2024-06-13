@@ -5,10 +5,10 @@
 
 \subsection{Prerequisites}
 
-First of all, you will need the following tools installed:
+First of all, you will need the following software installed:
 \begin{itemize}
-    \item \textbf{ROS Melodic} : You can install it by following the instructions on the official website: \url{http://wiki.ros.org/melodic/Installation}.
-    \item \textbf{Octomap}.
+    \item \textbf{ROS Melodic} : You can install it by following the instructions on the official website: \url{http://wiki.ros.org/melodic/Installation}. You likely need a Ubuntu 18.04 (Bionic Beaver) system.
+    \item \textbf{Octomap} : Check the package page on the ROS wiki for installation instructions: \url{http://wiki.ros.org/octomap}.
 \end{itemize}
 
 \subsection{Build}
@@ -20,14 +20,12 @@ git clone https://github.com/DimitriTimoz/tiled-evidential-occupancy-grid
 
 To build the project, run the following commands in the root directory of the project:
 \begin{minted}{bash}
-catkin_make
+catkin_make install
 \end{minted}
 
 \section{Run}
 
-After starting the ROS master (with the command \texttt{roscore}), you can run the project.
-
-Run the following commands in the root directory of the project:
+After starting the ROS master (with the command \texttt{roscore}), you can run the project with the following commands in the root directory of the project
 
 \begin{minted}{bash}
 source devel/setup.bash
@@ -41,7 +39,13 @@ source devel/setup.bash
 rosrun map_fusion map_fusion_node
 \end{minted}
 
-\section{Visualize}
+\section{Use}
+
+\subsection{Set the parameters}
+
+\todo
+
+\subsection{Visualize the map}
 
 To visualize the generated map, you can use the \texttt{rviz} tool. Once \texttt{rviz} is started, just add a \texttt{ColorOccupancyGrid} and set the following properties:
 
