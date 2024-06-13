@@ -24,3 +24,13 @@ Then, we have an local EOGM.
 Once the local EOGM is computed, we fuse it with the global EOGM.
 Just before the fusion, we update the global EOGM by decreasing the mass of the oldest cells which could be affected by the new local EOGM.
 Then, we fuse the local EOGM with the global EOGM using the Dempster's rule of combination.
+
+\subsection{Pignistic probability computation}
+
+\todo
+
+\subsection{Age consideration computation}
+
+For each cell, we compute the age consideration by computing the difference between the current timestamp and the last update timestamp.
+Each mass is discounted by a factor of $\alpha = e^{\frac{t_{old}-t_{new}}{\tau}} $ and the mass of the unknown state is set to $m_{G\{i, j\}, t_{new}}(\Omega) = 1 - \alpha + \alpha \times m_{G\{i, j\}, t_{old}}(\Omega)$
+To compute the age consideration, we obviously use vectorization.
