@@ -1,0 +1,26 @@
+\section{Software features}
+
+\subsection{Overview}
+
+The software developed for this project is a ROS node that implements the algorithms described in the previous sections.
+The node subscribes to the \texttt{laserScan} topic to receive laser data from the robot's LIDAR sensor and the \texttt{odometry} topic to receive odometry data from the robots.
+
+\subsection{The map}
+
+The map is represented as a 2D grid of cells, where each cell contains a belief mass function and last update timestamp.
+The map is initialized with a uniform belief mass function where the mass of the unknown state is $1$ and the other states have mass $0$.
+
+
+\subsection{Laser scan to grid conversion}
+
+The node receives laser scan data from the robot's LIDAR sensor and converts it into a 2D grid representation.
+For each laser scan, we create a new grid with the dimensions of the laser's field of view and resolution.
+For each ray, we draw a line from the robot's position to the end point of the ray and update the belief mass function by setting the masse of the free state to an estimation of the captor's accuracy.
+Once the ray reaches an obstacle, we set the mass of the occupied state to the same value as the free state when a cell is considered free.
+Then, we have an local EOGM.
+
+\subsection*{Map fusion}
+
+Once the local EOGM is computed, we fuse it with the global EOGM.
+Just before the fusion, we update the global EOGM by decreasing the mass of the oldest cells which could be affected by the new local EOGM.
+Then, we fuse the local EOGM with the global EOGM using the Dempster's rule of combination.
