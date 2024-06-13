@@ -16,3 +16,5 @@ doc/
 *.bbl
 *.blg
 *.bcf
+*.pygtex
+*.pygstyle

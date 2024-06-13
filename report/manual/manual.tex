@@ -1,0 +1,53 @@
+
+\chapter{Manual}
+
+\section{Build}
+
+\subsection{Prerequisites}
+
+First of all, you will need the following tools installed:
+\begin{itemize}
+    \item \textbf{ROS Melodic} : You can install it by following the instructions on the official website: \url{http://wiki.ros.org/melodic/Installation}.
+    \item \textbf{Octomap}.
+\end{itemize}
+
+\subsection{Build}
+
+Clone the repository from GitHub:
+\begin{minted}{bash}
+git clone https://github.com/DimitriTimoz/tiled-evidential-occupancy-grid
+\end{minted}
+
+To build the project, run the following commands in the root directory of the project:
+\begin{minted}{bash}
+catkin_make
+\end{minted}
+
+\section{Run}
+
+After starting the ROS master (with the command \texttt{roscore}), you can run the project.
+
+Run the following commands in the root directory of the project:
+
+\begin{minted}{bash}
+source devel/setup.bash
+sh scripts/run.sh
+\end{minted}
+
+or :
+
+\begin{minted}{bash}
+source devel/setup.bash
+rosrun map_fusion map_fusion_node
+\end{minted}
+
+\section{Visualize}
+
+To visualize the generated map, you can use the \texttt{rviz} tool. Once \texttt{rviz} is started, just add a \texttt{ColorOccupancyGrid} and set the following properties:
+
+\begin{itemize}
+    \item \texttt{Topic} : \texttt{/global\_eogm}
+    \item \texttt{Voxel coloring Scheme} : \texttt{Cell color}
+\end{itemize}
+
+It is recommanded to enable graphics acceleration if you run your system in a virtual machine.
