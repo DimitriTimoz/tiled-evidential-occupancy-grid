@@ -11,7 +11,7 @@ In this section, we discuss the optimization techniques employed to enhance the 
 One of the most effective ways to improve the performance of our algorithm is to parallelize the computation.
 Since OpenMP is integrated with ROS, we can utilize its parallel programming capabilities to distribute the computation across multiple CPU cores.
 However, we need to be careful when parallelizing the computation since concurrent access to shared data structures can lead to memory consistency issues.
-To avoid such problems, OpenMP provides the \todo macro to specify critical sections that should be executed atomically by a single thread.
+To avoid such problems, OpenMP provides the \texttt{\#pragma omp critical} macro to specify critical sections that should be executed atomically by a single thread.
 On the Robotnik Summit-XL HL, the processor is a 9th generation Intel processor (Coffee Lake Refresh) with 6 cores and 12 threads, this should allow from a 6x to 12x performance improvement for operations that can be parallelized.
 We applied parallelization to the computation of the following parts of our algorithm:
 \begin{itemize}
