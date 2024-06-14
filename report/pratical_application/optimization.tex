@@ -43,7 +43,7 @@ By reducing the memory footprint of our algorithm, we can reduce the number of d
 Here are some memory optimization techniques we used in our implementation:
 \begin{itemize}
     \item Fixed-size arrays: Using fixed-size arrays instead of dynamic arrays can reduce the overhead of dynamic memory management and improve cache locality.
-          For example, we can use the \todo and \todo functions to resize the vector without reallocation.
+          For example, we can use the `std::vector::reserve` and  `std::vector::resize` functions to resize the vector without reallocation.
     \item Stack memory: Using stack memory instead of heap memory for temporary variables can reduce the overhead of dynamic memory management.
     \item Reference passing: Passing variables, especially large data structures,by reference instead of by value can reduce the overhead of copying large data structures.
 \end{itemize}
