@@ -10,37 +10,32 @@ The node subscribes to the \texttt{laserScan} topic to receive laser data from t
 The map is represented as a 2D grid of cells, where each cell contains a belief mass function and last update timestamp.
 The map is initialized with a uniform belief mass function where the mass of the unknown state is $1$ and the other states have mass $0$.
 
-
 \subsection{Laser scan to grid conversion}
 
-The node receives laser scan data from the robot's LIDAR sensor and converts it into a 2D grid representation.
-For each laser scan, we create a new grid with the dimensions of the laser's field of view and resolution.
-For each ray, we draw a line from the robot's position to the end point of the ray and update the belief mass function by setting the masse of the free state to an estimation of the captor's accuracy.
-Once the ray reaches an obstacle, we set the mass of the occupied state to the same value as the free state when a cell is considered free.
-Then, we have an local EOGM.
+The node receives laser scan data from the robot's LIDAR sensor and converts it into a 2D cartesian grid representation.
+For each laser scan, a new grid is created with dimensions matching the laser's field of view and resolution.
+For each ray, a line is drawn from the robot's position to the endpoint of the ray, and the belief mass function is updated by setting the mass of the free state to an estimate of the sensor's accuracy.
+When the ray reaches an obstacle, the mass of the occupied state is set to the same value as the free state in cells considered free.
+This results in a local evidential occupancy grid map (EOGM).
 
 \subsection*{Map fusion}
 
 Once the local EOGM is computed, we fuse it with the global EOGM.
-Just before the fusion, we update the global EOGM by decreasing the mass of the oldest cells which could be affected by the new local EOGM.
-Then, we fuse the local EOGM with the global EOGM using the Dempster's rule of combination.
+Just before the fusion, we update the global EOGM by decreasing the mass of the oldest cells which could be affected by the new local EOGM (see section \ref{sec:age_consideration}).
+Then, we fuse the local EOGM with the global EOGM using the Dempster's rule of combination (see section \ref{sec:dempster_shafer_theory}).
 
 \subsection{Pignistic probability computation}
 
-Because we have mass functions, we need to compute the Pignistic probability to get a probability distribution to facilitate data exploitation.
-The Pignistic probability is computed by dividing the mass of each state by one minus the conflicting mass.
-To compute the Pignistic probability, we use vectorization to enhance the performance.
+Because we have mass functions, we need to compute the Pignistic probability to get a probability distribution to facilitate data exploitation (see section \ref{sec:pignistic_probability}).
 
 \subsection{Age consideration computation}
 
 For each cell, we compute the age consideration by computing the difference between the current timestamp and the last update timestamp.
-Each mass is discounted by a factor of $\alpha = e^{\frac{t_{old}-t_{new}}{\tau}} $ and the mass of the unknown state is set to $m_{G\{i, j\}, t_{new}}(\Omega) = 1 - \alpha + \alpha \times m_{G\{i, j\}, t_{old}}(\Omega)$
-To compute the age consideration, we obviously use vectorization.
+Each mass is discounted by a factor of $\alpha$ (see section \ref{sec:age_consideration}).
 
 \subsection{Octomap message}
 
-To visualize the map in RViz and transfer the map to other nodes, we publish the map as an \texttt{Octomap} message.
-The \texttt{Octomap} message is the best way to represent our EOGM with common ROS messages. 
-The \texttt{Octomap} message contains of each $x, y$ cell the Pignistic probability of the maximum probability state with a resolution of 10 blocks for 0 to 1.
-The blue color represents the unknown state, the green color represents the free state and the red color represents the occupied state.
-
+To visualize the map in RViz and transfer it to other nodes, we publish the map as an \texttt{Octomap} message.
+The \texttt{Octomap} message is the best way to represent our EOGM using common ROS messages since it leverages quadtree data structures to efficiently represent 3D occupancy grids.
+The \texttt{Octomap} message contains the Pignistic probability of the maximum probability state for each $x,y$ cell, with a resolution of 10 blocks from 0 to 1.
+In the visualization, blue represents the unknown state, green represents the free state, and red represents the occupied state.

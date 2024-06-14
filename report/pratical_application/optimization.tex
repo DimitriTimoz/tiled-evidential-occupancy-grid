@@ -30,7 +30,6 @@ This allowed perform 8 32 bit floating point operations in parallel using AVX2 i
 This should allow a performance improvement of up to 8x for operations that can be vectorized.
 In our case, we used vectorization to optimize the following parts of our algorithm:
 \begin{itemize}
-    \item Laser scan to grid conversion
     \item Belief mass function fusion
     \item Pignistic probability computation
     \item Age consideration computation
@@ -38,9 +37,10 @@ In our case, we used vectorization to optimize the following parts of our algori
 
 \subsection{Memory optimization}
 
-Memory optimization is another crucial aspect of performance optimization.
-By reducing the memory footprint of our algorithm, we can reduce the number of dynamic memory allocations and deallocations (reallocations), which can be a significant bottleneck in performance.
+Memory optimization is another crucial aspect of performance enhancement.
+By reducing the memory footprint of our algorithm, we can minimize the number of dynamic memory allocations and deallocations, which can significantly impact performance due to the overhead of dynamic memory management and system calls.
 Here are some memory optimization techniques we used in our implementation:
+
 \begin{itemize}
     \item Fixed-size arrays: Using fixed-size arrays instead of dynamic arrays can reduce the overhead of dynamic memory management and improve cache locality.
           For example, we can use the `std::vector::reserve` and  `std::vector::resize` functions to resize the vector without reallocation.

@@ -1,6 +1,6 @@
-\chapter{Results and Future Work}
+\chapter{Results and future work}
 
-\section{Experimental Results}
+\section{Experimental results}
 
 To evaluate the proposed method, we conducted experiments using the \textit{SummitXL} robot by \textit{Robotnik}, which is equipped with a laser scanner and IMU sensors. The test environment was a room measuring approximately $7 \times 6$ meters. We moved the robot slowly to minimize noise in the data collected by the IMU.
 
@@ -20,15 +20,30 @@ In the P.E.R.M.I.S. environment, using the \textit{SummitXL} robot, we obtained 
     \item The program runs in real-time at approximately 15 Hz and could be significantly improved by reducing the resolution.
 \end{itemize}
 
-\section{Future Work}
+\section{Future work}
 
-The proposed implementation is a first step towards using Evidential Grids for detecting moving objects. However, several improvements are needed to enhance its efficiency and reliability.
+The proposed implementation is a first step towards using Evidential Grids for detecting moving objects.
+However, several improvements are needed to enhance its efficiency and reliability.
 
-\subsection{Implementation Improvements}
+\subsection{Implementation improvements}
 
-Firstly, the program can be optimized for faster performance, potentially by using GPUs. Due to time constraints, we couldn't implement a tiled system to reduce memory usage. The lack of standardization in ROS messages is also problematic, as different robot manufacturers do not use the laser scan message uniformly. This prevented us from implementing a robust system to filter reliable data. We considered creating or using a more suitable message to transmit the EOGM data. One idea is to use an existing message for Rviz and another for other nodes. Additionally, developing a new message with its own Rviz plugin is a possibility.
+Here are the main improvements that could be made to the implementation:
 
-\subsection{Methodological Improvements}
+\begin{itemize}
+    \item \textbf{GPU acceleration}: The program could be further optimized for faster performance by using GPUs.
+    \item \textbf{Standardization of ROS messages}: The lack of standardization in ROS messages is problematic, as different robot manufacturers do not use the laser scan message uniformly.
+          This has prevented us from implementing a robust system to filter reliable data.
+    \item \textbf{Suitable message for EOGM data}: Despite the existing \texttt{Octomap} message, it is not ideal for further processing of EOGM data.
+          One solution could be to use an existing message for RViz and another standardized message for other nodes.
+          However, this would sacrifice the size optimization of the \texttt{Octomap} message, leading to slower communication.
+          Another solution could be to develop a new message with its own RViz plugin, though this would require significant effort.
+\end{itemize}
 
-Methodologically, the IMU data is very noisy due to the robot's movements, resulting in a high area of conflict. One solution could be to use a better IMU or to find a way to reduce conflicts near fixed objects.
-Maybe SLAM algorithms could be used to improve the robot's localization and reduce conflicts. The robot's movement could also be used to detect moving objects. For example, if the robot moves forward and the conflict disappears, it could indicate a moving object. The robot's movement could also be used to detect the robot's position and orientation, which could be used to improve the robot's localization.
+\subsection{Methodological improvements}
+
+Methodologically, the IMU data exhibits significant noise due to the robot's movements, leading to wide conflict areas, especially near room boundaries.
+One potential solution could involve upgrading to a more accurate IMU or implementing methods to mitigate conflicts near fixed objects.
+Incorporating SLAM algorithms may enhance robot localization and reduce conflicts.
+Additionally, leveraging the robot's movement could aid in detecting moving objects.
+For instance, observing the disappearance of conflicts when the robot moves forward could indicate the presence of a moving object.
+Furthermore, analyzing the robot's movement patterns could contribute to refining localization accuracy and orientation estimation.

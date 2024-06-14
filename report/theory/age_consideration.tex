@@ -1,5 +1,5 @@
 
-\section{Age consideration}
+\section{Age consideration} \label{sec:age_consideration}
 
 In the context of updating belief functions to account for the temporal aspect, an age consideration is introduced. This accounts for the change in information over time, allowing for the adjustment of belief functions based on the age of the data.
 
@@ -20,9 +20,9 @@ Upon incorporating the age consideration, the updated belief functions for focal
 
 $$
     \begin{cases}
-        m_{G\{i,j\},t_{new}}^{\alpha}(F) = (\alpha \times m_{G\{i,j\},t_{old}}(F)) \\
-        m_{G\{i,j\},t_{new}}^{\alpha}(O) = (\alpha \times m_{G\{i,j\},t_{old}}(O)) \\
-        m_{G\{i, j\}, t_{new}}^{\alpha}(\Omega) = 1 - \alpha + \alpha \times m_{G\{i, j\}, t_{old}}(\Omega)
+        m_{G\{i,j\},t_{new}}^{\alpha}(F) = \alpha \times m_{G\{i,j\},t_{old}}(F) \\
+        m_{G\{i,j\},t_{new}}^{\alpha}(O) = \alpha \times m_{G\{i,j\},t_{old}}(O) \\
+        m_{G\{i, j\}, t_{new}}^{\alpha}(\Omega) = (1 - \alpha) + \alpha \times m_{G\{i, j\}, t_{old}}(\Omega)
     \end{cases}
 $$
 

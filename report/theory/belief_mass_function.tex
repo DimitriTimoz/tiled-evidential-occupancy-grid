@@ -1,8 +1,8 @@
 
 \section{Belief Mass Function}
 
-In the Dempster-Shafer theory of evidence, a fundamental concept is that of the belief mass function.
-It serves as a mathematical representation of uncertainty associated with propositions within a given frame of discernment.
+In Dempster-Shafer theory of evidence, a fundamental concept is the belief mass function.
+It provides a mathematical representation of the uncertainty associated with propositions within a given frame of discernment.
 
 \subsection{Definition}
 
@@ -17,25 +17,22 @@ Where:
     \item $ m(A) $ represents the belief mass assigned to subset $ A \subseteq \Omega $.
 \end{itemize}
 
-In our case of an evidential grid, the frame of discernment is $\Omega = \{F, O, \Omega, \emptyset\}$, where:
+In our case of an evidential grid map, the frame of discernment is $\Omega = \{F, O, \Omega, \emptyset\}$, where:
 
 \begin{itemize}
     \item $ F $ represents the proposition of unoccupied space.
     \item $ O $ represents the proposition of occupied space.
-    \item $ \Omega $ denotes the entire frame of discernment (all possible propositions).
+    \item $ \Omega $ denotes the entire frame of discernment (all possible propositions), which means a conflict between $ F $ and $ O $.
     \item $ \emptyset $ denotes the empty set, representing ignorance or lack of information.
 \end{itemize}
-
-In summary, belief mass functions provide a formalism for representing and reasoning with uncertain evidence, making them a key component of the Dempster-Shafer theory and applications such as decision-making under uncertainty and information fusion.
-
 
 \subsection{Properties}
 
 \begin{itemize}
     \item Normalization: The sum of belief masses assigned to all subsets of $ \Omega $ equals 1:
           $$ \sum_{A \subseteq \Omega} m(A) = 1 $$
-    \item Conflict Measure: The belief mass function accounts for conflicts or overlaps between different subsets. This is crucial for combining evidence from multiple sources.
-    \item Ignorance Representation : The belief mass function can explicitly model ignorance or lack of information by assigning mass to the empty set $\emptyset$.
+    \item Conflict measure: The belief mass function accounts for conflicts or overlaps between different subsets. This is crucial for combining evidence from multiple sources.
+    \item Ignorance representation : The belief mass function can explicitly model ignorance or lack of information by assigning mass to the empty set $\emptyset$.
           This represents the uncertainty about all subsets of $ \Omega $.
 \end{itemize}
 
@@ -46,3 +43,4 @@ In summary, belief mass functions provide a formalism for representing and reaso
     \item Uncertainty: Low belief mass suggests uncertainty or lack of evidence for the propositions in the subset.
 \end{itemize}
 
+In summary, belief mass functions provide a formalism for representing and reasoning with uncertain evidence, making them a key component of the Dempster-Shafer theory and applications such as decision-making under uncertainty and information fusion.
