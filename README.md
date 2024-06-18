@@ -1,8 +1,8 @@
-<h1 align="center">Tiled evidential occupancy grid map (EOGM)</h1>
+<h1 align="center">🗺️Evidential occupancy grid map (EOGM)🗺️</h1>
 
 ## 📝 Description
 
-This repository contains a ROS node that fuses multiple evidential occupancy grid maps (EOGM) into a single map and publishes it on a topic in the form of an octomap. For performance reasons, the fusion is done using AVX2 instructions. This is a part of the robotic project of the 3rd year of engineering school at INSA Rouen Normandie. 
+This repository contains a ROS node that fuses multiple evidential occupancy grid maps (EOGM) into a single map and publishes it on a topic in the form of an octomap. For performance reasons, the fusion is done using AVX2 instructions. This is a part of the deepening and opening project of the 3rd year of engineering school at INSA Rouen Normandie. 
 
 ## ✅ Requirements
 
